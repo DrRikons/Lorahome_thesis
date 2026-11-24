@@ -1,0 +1,5 @@
+collections:
+# Dependency for community sudoers in init role
+  - name: community.general
+# Dependency for docker compose V2
+  - name: community.docker

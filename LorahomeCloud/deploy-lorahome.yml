@@ -1,0 +1,6 @@
+---
+- name: Install LoRaHome IoT containers
+  become: true
+  hosts: webserver
+  roles:
+    - lorahome

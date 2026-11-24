@@ -1,0 +1,24 @@
+user {{ mqtt_gateway_user }}
+topic write lorahome/sensor/+/data
+topic write lorahome/sensor/+/telemetry
+topic write lorahome/sensor/+/status
+topic write lorahome/sensor/+/config/result
+topic write lorahome/gateway/+/status
+topic write lorahome/gateway/+/relay/result
+topic read lorahome/sensor/+/config
+topic read lorahome/gateway/+/relay
+
+user {{ mqtt_normalizer_user }}
+topic read lorahome/sensor/+/data
+topic read lorahome/sensor/+/telemetry
+topic read lorahome/sensor/+/status
+topic read lorahome/gateway/+/status
+
+user {{ mqtt_control_api_user }}
+topic write lorahome/sensor/+/config
+topic read lorahome/sensor/+/config
+topic read lorahome/sensor/+/config/result
+
+topic write lorahome/gateway/+/relay
+topic read lorahome/gateway/+/relay
+topic read lorahome/gateway/+/relay/result

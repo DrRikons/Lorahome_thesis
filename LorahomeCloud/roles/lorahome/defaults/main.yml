@@ -1,0 +1,40 @@
+---
+container_data_path: '/data/container_data'
+app_dir: 'lorahome'
+lorahome_network: 'lorahome'
+mqtt_public_network: 'mqtt-public'
+proxy_network: 'proxynet'
+mqtt_private_bind_host: 'lorahome-mqtt-private'
+mqtt_public_bind_host: 'lorahome-mqtt-public'
+
+grafana_host: 'hosturl'
+control_api_host: 'host_url'
+letsencrypt_test: false
+mqtt_host: '{{ grafana_host }}'
+mqtt_port: 8883
+alert_low_battery_percent: 20
+alert_malformed_messages_5m: 10
+alert_webhook_url: ''
+
+influxdb_org: 'lorahome'
+influxdb_bucket: 'lorahome'
+influxdb_event_bucket: 'lorahome-events'
+influxdb_admin_user: 'influxxadmin'
+influxdb_admin_token: ''
+influxdb_admin_password: ''
+
+grafana_admin_user: 'GrafanaAdminUser'
+grafana_admin_password: ''
+
+mqtt_gateway_user: 'LoraHomeMqttUser'
+mqtt_gateway_password: ''
+mqtt_normalizer_user: 'lorahome-normalizer'
+mqtt_normalizer_password: ''
+mqtt_control_api_user: 'lorahome-control-api'
+mqtt_control_api_password: ''
+
+control_api_token: ''
+control_command_secret: ''
+
+mqtt_tls_cert_host_path: '{{ container_data_path }}/nginx/certs/{{ mqtt_host }}.crt'
+mqtt_tls_key_host_path: '{{ container_data_path }}/nginx/certs/{{ mqtt_host }}.key'

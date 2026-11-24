@@ -1,0 +1,130 @@
+{% macro env(value) -%}
+{{ value | string | replace('$', '$$') | to_json }}
+{%- endmacro %}
+name: lorahome
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: lorahome-mosquitto
+    user: "1883:1883"
+    restart: unless-stopped
+    environment:
+      LETSENCRYPT_HOST: {{ env(mqtt_host) }}
+      LETSENCRYPT_RESTART_CONTAINER: "true"
+    ports:
+      - "{{ mqtt_port }}:{{ mqtt_port }}"
+    volumes:
+      - "{{ container_data_path }}/{{ app_dir }}/mosquitto/config:/mosquitto/config"
+      - "{{ container_data_path }}/{{ app_dir }}/mosquitto/data:/mosquitto/data"
+      - "{{ container_data_path }}/{{ app_dir }}/mosquitto/log:/mosquitto/log"
+      - "{{ container_data_path }}/{{ app_dir }}/mosquitto/certs:/mosquitto/certs:ro"
+    networks:
+      {{ lorahome_network }}:
+        aliases:
+          - {{ env(mqtt_private_bind_host) }}
+      {{ mqtt_public_network }}:
+        aliases:
+          - {{ env(mqtt_public_bind_host) }}
+
+    healthcheck:
+      test: ["CMD-SHELL", {{ env('nc -w 2 ' ~ (mqtt_private_bind_host | quote) ~ ' 1883 < /dev/null && nc -w 2 ' ~ (mqtt_public_bind_host | quote) ~ ' ' ~ mqtt_port ~ ' < /dev/null') }}]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 10s
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: lorahome-influxdb
+    restart: unless-stopped
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: "setup"
+      DOCKER_INFLUXDB_INIT_USERNAME: {{ env(influxdb_admin_user) }}
+      DOCKER_INFLUXDB_INIT_PASSWORD: {{ env(influxdb_admin_password) }}
+      DOCKER_INFLUXDB_INIT_ORG: {{ env(influxdb_org) }}
+      DOCKER_INFLUXDB_INIT_BUCKET: {{ env(influxdb_bucket) }}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: {{ env(influxdb_admin_token) }}
+    volumes:
+      - "{{ container_data_path }}/{{ app_dir }}/influxdb:/var/lib/influxdb2"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8086/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 30s
+    networks:
+      - {{ lorahome_network }}
+
+  normalizer:
+    build: ./normalizer
+    container_name: lorahome-normalizer
+    restart: unless-stopped
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+    environment:
+      MQTT_HOST: "mosquitto"
+      MQTT_PORT: "1883"
+      MQTT_USER: {{ env(mqtt_normalizer_user) }}
+      MQTT_PASSWORD: {{ env(mqtt_normalizer_password) }}
+      INFLUX_URL: "http://influxdb:8086"
+      INFLUX_TOKEN: {{ env(influxdb_admin_token) }}
+      INFLUX_ORG: {{ env(influxdb_org) }}
+      INFLUX_BUCKET: {{ env(influxdb_bucket) }}
+      INFLUX_EVENT_BUCKET: {{ env(influxdb_event_bucket) }}
+    networks:
+      - {{ lorahome_network }}
+
+  grafana:
+    image: grafana/grafana:11.6.0
+    container_name: lorahome-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: {{ env(grafana_admin_user) }}
+      GF_SECURITY_ADMIN_PASSWORD: {{ env(grafana_admin_password) }}
+      GF_INSTALL_PLUGINS: "volkovlabs-form-panel 5.1.0,volkovlabs-echarts-panel 6.6.0"
+      VIRTUAL_HOST: {{ env(grafana_host) }}
+      LETSENCRYPT_HOST: {{ env(grafana_host) }}
+      LETSENCRYPT_TEST: {{ env(letsencrypt_test | ternary('true', 'false')) }}
+      VIRTUAL_PORT: "3000"
+    volumes:
+      - "{{ container_data_path }}/{{ app_dir }}/grafana:/var/lib/grafana"
+      - "{{ container_data_path }}/{{ app_dir }}/grafana/provisioning:/etc/grafana/provisioning"
+    networks:
+      - {{ lorahome_network }}
+      - {{ proxy_network }}
+
+  control-api:
+    build: ./control-api
+    container_name: lorahome-control-api
+    restart: unless-stopped
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    volumes:
+      - "{{ container_data_path }}/{{ app_dir }}/control-api:/data"
+    networks:
+      - {{ lorahome_network }}
+      - {{ proxy_network }}
+    environment:
+      MQTT_HOST: "mosquitto"
+      MQTT_PORT: "1883"
+      MQTT_USER: {{ env(mqtt_control_api_user) }}
+      MQTT_PASSWORD: {{ env(mqtt_control_api_password) }}
+      CONTROL_API_TOKEN: {{ env(control_api_token) }}
+      CONTROL_COMMAND_SECRET: {{ env(control_command_secret) }}
+      GRAFANA_ORIGIN: {{ env('https://' ~ grafana_host) }}
+      VIRTUAL_HOST: {{ env(control_api_host) }}
+      LETSENCRYPT_HOST: {{ env(control_api_host) }}
+      VIRTUAL_PORT: "8000"
+
+networks:
+  {{ lorahome_network }}:
+    internal: true
+  {{ mqtt_public_network }}:
+    driver: bridge
+  {{ proxy_network }}:
+    external: true

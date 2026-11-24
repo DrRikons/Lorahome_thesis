@@ -1,0 +1,10 @@
+milesburton/DallasTemperature@^3.11.0
+wollewald/INA226_WE@^1.2.0
+x385832/Elog@^2.0.17
+bblanchon/ArduinoJson@^6.21.5
+jgromes/RadioLib@7.6.0
+paulstoffregen/OneWire@2.3.7
+yiannisbourkelis/Uptime Library
+rweather/Crypto@^0.4.0
+olikraus/U8g2@^2.34.4
+knolleary/PubSubClient@^2.8

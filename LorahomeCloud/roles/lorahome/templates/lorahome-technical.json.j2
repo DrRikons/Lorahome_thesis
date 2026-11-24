@@ -1,0 +1,3142 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 227,
+      "panels": [],
+      "title": "Gateway Status",
+      "type": "row",
+      "targets": []
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "max": 120,
+          "min": 10,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 75
+              }
+            ]
+          },
+          "noValue": "Stale or unavailable",
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 9,
+        "x": 0,
+        "y": 1
+      },
+      "id": 202,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.cpu_temperature_c then float(v: r.cpu_temperature_c) else debug.null(type: \"float\")}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Gateway CPU temperature",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "#EAB839",
+                "value": 65
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent",
+          "noValue": "Stale or unavailable"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 10,
+        "x": 9,
+        "y": 1
+      },
+      "id": 203,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.ram_used_bytes and exists r.ram_total_bytes and r.ram_total_bytes > 0 then float(v: r.ram_used_bytes) / float(v: r.ram_total_bytes) * 100.0 else debug.null(type: \"float\")}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Gateway RAM used",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "rotmhz",
+          "noValue": "Stale or unavailable"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 19,
+        "y": 1
+      },
+      "id": 201,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"cpu_frequency_mhz\") |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Gateway CPU frequency",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 19,
+        "y": 6
+      },
+      "id": 211,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.gateway_radio_present then (if exists r.gateway_radio_duty_cooldown_ms then float(v: r.gateway_radio_duty_cooldown_ms) else debug.null(type: \"float\")) else if exists r.duty_cooldown_ms then float(v: r.duty_cooldown_ms) else debug.null(type: \"float\")}))"
+        }
+      ],
+      "title": "Gateway DC cooldown",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 12
+      },
+      "id": 29,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"uptime\") |> group() |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> keep(columns: [\"_time\", \"wifi_status\"]) |> rename(columns: {wifi_status: \"_value\"}) |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Gateway Wi-Fi",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 12
+      },
+      "id": 229,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\")\r\n  |> range(start: -15m)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"gateway_status\" and\r\n    r.gateway_id == \"${gateway_id}\" and\r\n    r._field == \"wifi_ssid\"\r\n  )\r\n  |> group(columns: [\"gateway_id\"])\r\n  |> sort(columns: [\"_time\"], desc: true)\r\n  |> limit(n: 1) |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Gateway Wi-Fi SSID",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 7,
+        "x": 12,
+        "y": 12
+      },
+      "id": 230,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\")\r\n  |> range(start: -15m)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"gateway_status\" and\r\n    r.gateway_id == \"${gateway_id}\" and\r\n    (r._field == \"mqtt_host\" or r._field == \"mqtt_port\")\r\n  )\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> filter(fn: (r) => exists r.mqtt_host and exists r.mqtt_port)\r\n  |> group(columns: [\"gateway_id\"])\r\n  |> sort(columns: [\"_time\"], desc: true)\r\n  |> limit(n: 1)\r\n  |> map(fn: (r) => ({\r\n    _time: r._time,\r\n    _value: r.mqtt_host + \":\" + string(v: r.mqtt_port)\r\n  })) |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Gateway Mqtt Host",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "description": "Failed or inconsistent SD status requires local inspection. MQTT may remain connected while configuration writes are disabled.",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "conflict": {
+                  "color": "orange",
+                  "text": "Inconsistent"
+                },
+                "failed": {
+                  "color": "red",
+                  "text": "Failed"
+                },
+                "ok": {
+                  "color": "green",
+                  "text": "OK"
+                },
+                "unknown": {
+                  "color": "yellow",
+                  "text": "Unknown"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "Unavailable / stale",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 19,
+        "y": 12
+      },
+      "id": 232,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"sd_status\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> keep(columns: [\"_time\", \"_value\"])"
+        }
+      ],
+      "title": "Gateway SD storage",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "id": 221,
+      "panels": [],
+      "title": "Sensor Config",
+      "type": "row",
+      "targets": []
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "id": 7,
+      "options": {
+        "buttonGroup": {
+          "orientation": "right",
+          "size": "md"
+        },
+        "confirmModal": {
+          "body": "Clear this Sensor's sleep, mode, TX-power and CPU overrides and inherit the current Gateway defaults? The active radio profile and pairing stay unchanged. Follow confirmation in Sensor settings.",
+          "cancel": "Cancel",
+          "columns": {
+            "include": [],
+            "name": "Label",
+            "newValue": "New Value",
+            "oldValue": "Old Value"
+          },
+          "confirm": "Confirm",
+          "elementDisplayMode": "modified",
+          "title": "Warning!"
+        },
+        "elementValueChanged": "",
+        "elements": [
+          {
+            "allowCustomValue": false,
+            "id": "inheritDefaults",
+            "options": [
+              {
+                "id": "clear",
+                "label": "Inherit Gateway sleep, mode, TX-power and CPU defaults",
+                "type": "string",
+                "value": "clear"
+              }
+            ],
+            "optionsSource": "Custom",
+            "section": "",
+            "title": "",
+            "tooltip": "Command progress appears in Sensor settings. Gateway defaults depend on its current configuration.",
+            "type": "checkboxList",
+            "uid": "9925a765-908c-4025-9669-9755036f3426",
+            "unit": "",
+            "value": []
+          }
+        ],
+        "initial": {
+          "code": "",
+          "contentType": "application/json",
+          "datasource": "",
+          "getPayload": "return {}",
+          "highlight": false,
+          "highlightColor": "green",
+          "method": "-",
+          "payload": {}
+        },
+        "layout": {
+          "orientation": "vertical",
+          "padding": 10,
+          "sectionVariant": "default",
+          "sections": [],
+          "variant": "single"
+        },
+        "reset": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "process",
+          "text": "Reset",
+          "variant": "hidden"
+        },
+        "resetAction": {
+          "code": "",
+          "confirm": false,
+          "getPayload": "return {}",
+          "mode": "initial",
+          "payload": {}
+        },
+        "saveDefault": {
+          "icon": "save",
+          "text": "Save Default",
+          "variant": "hidden"
+        },
+        "submit": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "arrow-left",
+          "text": "Restore Sensor Defaults",
+          "variant": "primary"
+        },
+        "sync": false,
+        "update": {
+          "code": "const response=context.panel.response;if(!response){context.grafana.notifyError(['Sensor settings','Request failed']);return;}\nreturn response.clone().json().then(body=>{if(!response.ok){context.grafana.notifyError(['Sensor settings',JSON.stringify(body)]);return;}const sensor=context.grafana.templateService.replace('${sensor_id}');localStorage.setItem('lorahome-sensor-settings:'+sensor,body.commandId);context.panel.patchFormValue({inheritDefaults:[]});context.grafana.notifyWarning(['Sensor settings','Command sent; awaiting complete confirmation. ID: '+body.commandId]);}).catch(()=>context.grafana.notifyError(['Sensor settings','Invalid response']));",
+          "confirm": true,
+          "contentType": "application/json",
+          "getPayload": "const sensor=context.grafana.templateService.replace('${sensor_id}');if(localStorage.getItem('lorahome-sensor-settings:'+sensor))throw Error('Previous Sensor command is unresolved; inspect or acknowledge it first');const selected=context.panel.elements.find(e=>e.id==='inheritDefaults')?.value;if(!Array.isArray(selected)||!selected.includes('clear'))throw Error('Select clear overrides first');return {inheritDefaults:true};",
+          "header": [
+            {
+              "name": "Authorization",
+              "value": {{ ("Bearer " ~ control_api_token) | to_json }}
+            }
+          ],
+          "method": "POST",
+          "payload": {},
+          "payloadMode": "custom",
+          "url": "https://{{ control_api_host }}/api/v1/sensors/${sensor_id}/config"
+        },
+        "updateEnabled": "auto"
+      },
+      "pluginVersion": "5.1.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": ""
+        }
+      ],
+      "title": "Restore Sensor Defaults",
+      "transparent": true,
+      "type": "volkovlabs-form-panel"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "id": 6,
+      "options": {
+        "buttonGroup": {
+          "orientation": "right",
+          "size": "md"
+        },
+        "confirmModal": {
+          "body": "The Sensor must be online and confirmed in Development mode. Send a mode change separately and wait for confirmation before changing the radio profile.",
+          "cancel": "Cancel",
+          "columns": {
+            "include": [
+              "name",
+              "oldValue",
+              "newValue"
+            ],
+            "name": "Label",
+            "newValue": "New Value",
+            "oldValue": "Old Value"
+          },
+          "confirm": "Confirm",
+          "elementDisplayMode": "modified",
+          "title": "Confirm device changes"
+        },
+        "elementValueChanged": "const recentValue = (name, maxAge) => {\n  const frame = context.panel.data.series.find(s => s.fields.some(f => f.name === name));\n  const valueField = frame?.fields.find(f => f.name === name);\n  const timeField = frame?.fields.find(f => f.type === 'time' || f.name === '_time');\n  const value = valueField?.values?.get?.(valueField.values.length-1) ?? valueField?.values?.[valueField.values.length-1];\n  const at = timeField?.values?.get?.(timeField.values.length-1) ?? timeField?.values?.[timeField.values.length-1];\n  const age = Date.now() - Number(at);\n  return Number.isFinite(age) && age >= -30000 && age <= maxAge ? value : undefined;\n};\nconst devEligible = () => recentValue('sensorOnline',300000) === true && recentValue('sensorDevMode',900000) === 1 && recentValue('gatewayFresh',300000) !== undefined;\nif (context.element?.id === 'radioPreview') return;\nconst sensor = context.grafana.templateService.replace('${sensor_id}');\nconst base = context.grafana.templateService.replace(context.panel.options.update.url).replace(/\\/config$/, '');\nconst auth = context.panel.options.update.header.find(h => h.name === 'Authorization')?.value;\nconst headers = {Authorization: auth};\nconst getPending = () => fetch(base + '/radio-transition', {headers, cache: 'no-store'}).then(r => r.ok ? r.json() : Promise.reject(Error('Transition status unavailable')));\nif (context.element?.id === 'radioRecovery') {\n  const selected = context.element.value || [];\n  context.panel.patchFormValue({radioRecovery: []});\n  if (selected.includes('refresh')) { context.panel.initialRequest(); return; }\n  if (!selected.includes('acknowledge')) return;\n  if (!window.confirm('Acknowledge the unresolved transition after following local recovery instructions? This does not confirm or resend the command.')) return;\n  context.panel.disableSubmit();\n  return getPending().then(result => {\n    if (!result.pending) return;\n    return fetch(base + '/radio-transition/' + encodeURIComponent(result.pending.commandId) + '/acknowledge', {method:'POST', headers}).then(r => {if (!r.ok) throw Error('Acknowledgement failed');});\n  }).then(() => {\n    window.dispatchEvent(new CustomEvent('lorahome-radio-transition', {detail:{sensor, pending:false}}));\n  }).catch(() => {context.panel.disableSubmit(); context.panel.patchFormValue({radioPreview:'Recovery acknowledgement failed; retry'});});\n}\ncontext.panel.disableSubmit();\nreturn getPending().then(result => {\n if (result.pending) {context.panel.patchFormValue({radioPreview:'Transition '+result.pending.status+' (ID: '+result.pending.commandId+'); refresh status or acknowledge recovery after inspection.'}); return;}\n if(!devEligible()){context.panel.patchFormValue({radioPreview:'Unavailable: Sensor must be online and confirmed in Development mode'});return;}\n\n\nconst values = context.panel.formValue();\nconst preset = values.radioProfilePreset;\nconst profiles = {\n  fast: [7, 125, 5],\n  default: [9, 125, 5],\n  range: [10, 125, 5]\n};\n\nconst selected = preset\n  ? profiles[preset]\n  : [\n    Number(values.spreadingFactor),\n    Number(values.bandwidthKhz),\n    Number(values.codingRate)\n  ];\n\nconst bandwidths = [7.8, 10.4, 15.6, 20.8, 31.25, 41.7, 62.5, 125, 250, 500];\nconst [sf, bw, cr] = selected || [];\n\nif (\n  !Number.isInteger(sf) || sf < 7 || sf > 12 ||\n  !bandwidths.includes(bw) ||\n  !Number.isInteger(cr) || cr < 5 || cr > 8\n) {\n  context.panel.patchFormValue({ radioPreview: 'Select a valid profile' });\n  context.panel.disableSubmit();\n  return;\n}\n\nconst air = (bytes, profile) => {\n  const [s, b, c] = profile;\n  const t = Math.pow(2, s) / (b * 1000);\n  const de = t >= 0.016 ? 1 : 0;\n  const symbols = 8 + Math.max(\n    Math.ceil((8 * bytes - 4 * s + 44) / (4 * (s - 2 * de))) * c,\n    0\n  );\n  return (12.25 + symbols) * t;\n};\n\nconst op = air(34, selected);\nconst dev = air(45, selected);\nconst ack = air(10, selected);\nconst minOp = Math.max(10, Math.ceil(99 * Math.max(op, ack)));\nconst minDev = Math.max(10, Math.ceil(99 * Math.max(dev, ack)));\n\nif (minOp > 255 || minDev > 255) {\n  context.panel.patchFormValue({\n    radioPreview: 'Unsupported: minimum sleep exceeds 255 s'\n  });\n  context.panel.disableSubmit();\n  return;\n}\n\nconst frames = context.panel.data.series;\nconst field = name => {\n  const f = frames.flatMap(s => s.fields).find(x => x.name === name);\n  return f?.values?.get?.(f.values.length - 1)\n    ?? f?.values?.[f.values.length - 1];\n};\n\nlet comparison = 'radio airtime change: N/A; TX consumption: N/A';\nconst current = field('radio_available') === true\n  ? [\n    field('radio_spreading_factor'),\n    field('radio_bandwidth_khz'),\n    field('radio_coding_rate')\n  ]\n  : null;\n\nconst baselineTime = Number(field('_time'));\nconst baselineLabel = Number.isFinite(baselineTime) && baselineTime > 0 ? `last reported ${new Date(baselineTime).toLocaleString()}${Date.now()-baselineTime>300000?' (stale)':''}` : 'report time unavailable';\nif (current?.every(Number.isFinite)) {\n  const ratios = [op / air(34, current), dev / air(45, current)];\n  const pct = ratios.map(r => {\n    const change = Math.round((r - 1) * 100);\n    return `${change >= 0 ? '+' : ''}${change}`;\n  }).join('/');\n  const multiplier = ratios.map(r => `${Number(r.toFixed(2))}`).join('/');\n\n  comparison = `radio airtime change: ${pct}%, TX consumption: x${multiplier}`;\n}\n\ncontext.panel.patchFormValue({\n  radioPreview: `Minimum sleep: ${minOp}/${minDev} s, ${comparison}; baseline ${baselineLabel}.`\n});\ncontext.panel.enableSubmit();\n}).catch(() => {context.panel.disableSubmit();context.panel.patchFormValue({radioPreview:'Transition status unavailable; retry before submitting'});});",
+        "elements": [
+          {
+            "allowCustomValue": false,
+            "id": "radioProfilePreset",
+            "labelWidth": 20,
+            "options": [
+              {
+                "id": "fast",
+                "label": "Fast (SF7 / BW125 / CR4/5)",
+                "value": "fast"
+              },
+              {
+                "id": "default",
+                "label": "Default (SF9 / BW125 / CR4/5)",
+                "value": "default"
+              },
+              {
+                "id": "range",
+                "label": "Range (SF10 / BW125 / CR4/5)",
+                "value": "range"
+              }
+            ],
+            "optionsSource": "Custom",
+            "section": "",
+            "showIf": "",
+            "title": "Preset",
+            "tooltip": "Requires recent online Sensor status and confirmed Development mode.",
+            "type": "select",
+            "uid": "ddcd18b1-a676-4db9-ad48-b81930a85911",
+            "unit": "",
+            "value": ""
+          },
+          {
+            "id": "radioPreview",
+            "labelWidth": 20,
+            "options": [],
+            "optionsSource": "Custom",
+            "section": "",
+            "title": "Estimates",
+            "tooltip": "TX estimates assume unchanged power per transmission, not actual battery life. Values OP/DEV",
+            "type": "disabled",
+            "uid": "radio-preview-radio-profile-preset",
+            "unit": "",
+            "value": "Select a profile"
+          },
+          {
+            "id": "radioRecovery",
+            "uid": "radio-recovery-6",
+            "type": "checkboxList",
+            "title": "Transition status",
+            "labelWidth": 20,
+            "section": "",
+            "optionsSource": "Custom",
+            "options": [
+              {
+                "label": "Refresh transition status",
+                "value": "refresh",
+                "type": "string"
+              },
+              {
+                "label": "Acknowledge uncertainty after local recovery",
+                "value": "acknowledge",
+                "type": "string"
+              }
+            ],
+            "value": []
+          }
+        ],
+        "initial": {
+          "code": "const recentValue = (name, maxAge) => {\n  const frame = context.panel.data.series.find(s => s.fields.some(f => f.name === name));\n  const valueField = frame?.fields.find(f => f.name === name);\n  const timeField = frame?.fields.find(f => f.type === 'time' || f.name === '_time');\n  const value = valueField?.values?.get?.(valueField.values.length-1) ?? valueField?.values?.[valueField.values.length-1];\n  const at = timeField?.values?.get?.(timeField.values.length-1) ?? timeField?.values?.[timeField.values.length-1];\n  const age = Date.now() - Number(at);\n  return Number.isFinite(age) && age >= -30000 && age <= maxAge ? value : undefined;\n};\nconst devEligible = () => recentValue('sensorOnline',300000) === true && recentValue('sensorDevMode',900000) === 1 && recentValue('gatewayFresh',300000) !== undefined;\nconst sensor = context.grafana.templateService.replace('${sensor_id}');\nconst base = context.grafana.templateService.replace(context.panel.options.update.url).replace(/\\/config$/, '');\nconst auth = context.panel.options.update.header.find(h => h.name === 'Authorization')?.value;\nconst headers = {Authorization: auth};\nconst getPending = () => fetch(base + '/radio-transition', {headers, cache: 'no-store'}).then(r => r.ok ? r.json() : Promise.reject(Error('Transition status unavailable')));\nconst timerKey = '__lorahomeRadioTimer' + \"6\";\nconst dashboardPath = window.location.pathname;\nconst stopPolling = () => { if (window[timerKey]) {window.clearInterval(window[timerKey]); delete window[timerKey];} };\nstopPolling();\nconst startPolling = () => {\n  if (window[timerKey]) return;\n  let checking = false;\n  window[timerKey] = window.setInterval(() => {\n    if (window.location.pathname !== dashboardPath) {stopPolling(); return;}\n    if (checking || document.visibilityState === 'hidden') return;\n    checking = true;\n    getPending().then(result => {\n      if (!result.pending) {\n        stopPolling();\n        window.dispatchEvent(new CustomEvent('lorahome-radio-transition', {detail:{sensor, pending:false}}));\n      } else context.panel.patchFormValue({radioPreview:'Transition ' + result.pending.status + ' (ID: ' + result.pending.commandId + '); waiting for confirmation.'});\n    }).catch(() => {}).finally(() => {checking = false;});\n  }, 5000);\n};\nconst listenerKey = '__lorahomeRadioListener' + \"6\";\nif (window[listenerKey]) window.removeEventListener('lorahome-radio-transition', window[listenerKey]);\nwindow[listenerKey] = event => {\n  if (event.detail?.sensor !== sensor) return;\n  if (event.detail.pending) {\n    context.panel.disableSubmit();\n    context.panel.patchFormValue({radioPreview: 'Radio transition pending; refresh status or acknowledge recovery after inspection.'});\n    startPolling();\n  } else {stopPolling(); context.panel.initialRequest();}\n};\nwindow.addEventListener('lorahome-radio-transition', window[listenerKey]);\nconst fields = context.panel.data.series.flatMap(s => s.fields);\nconst field = name => { const f = fields.find(x => x.name === name); return f?.values?.get?.(f.values.length-1) ?? f?.values?.[f.values.length-1]; };\nconst sf=field('radio_spreading_factor'), bw=field('radio_bandwidth_khz'), cr=field('radio_coding_rate'), at=field('_time');\nconst valid = field('radio_available') === true && [sf,bw,cr].every(Number.isFinite);\ncontext.panel.disableSubmit();\nreturn getPending().then(result => {\n  if (result.pending) {\n    startPolling();\n    context.panel.patchFormValue({radioPreview: 'Transition ' + result.pending.status + ' (ID: ' + result.pending.commandId + '); refresh status or acknowledge recovery after inspection.'});\n    return;\n  }\n  if (!devEligible()) {context.panel.patchFormValue({radioPreview:'Unavailable: Sensor must be online and confirmed in Development mode'});return;}\n  const timestamp = Number.isFinite(Number(at)) ? new Date(Number(at)).toLocaleString() + (Date.now() - Number(at) > 300000 ? ' (stale)' : '') : 'time unavailable';\n  context.panel.patchFormValue({radioPreview: valid ? `Last reported: SF${sf} / BW${bw} / CR4/${cr} (${timestamp})` : 'Last reported profile: N/A'});\n  context.panel.enableSubmit();\n}).catch(() => { context.panel.disableSubmit(); startPolling(); context.panel.patchFormValue({radioPreview:'Transition status unavailable; retry before submitting'}); });",
+          "contentType": "application/json",
+          "datasource": "",
+          "getPayload": "return {}",
+          "highlight": false,
+          "highlightColor": "green",
+          "method": "query",
+          "payload": {}
+        },
+        "layout": {
+          "orientation": "vertical",
+          "padding": 10,
+          "sectionVariant": "default",
+          "sections": [],
+          "variant": "single"
+        },
+        "reset": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "process",
+          "text": "Reset",
+          "variant": "hidden"
+        },
+        "resetAction": {
+          "code": "",
+          "confirm": false,
+          "getPayload": "return {}",
+          "mode": "initial",
+          "payload": {}
+        },
+        "saveDefault": {
+          "icon": "save",
+          "text": "Save Default",
+          "variant": "hidden"
+        },
+        "submit": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "cloud-upload",
+          "text": "Send changed values",
+          "variant": "primary"
+        },
+        "sync": false,
+        "update": {
+          "code": "const response=context.panel.response;\nif(!response){context.grafana.notifyError(['Radio profile','Request failed']);return;}\nreturn response.clone().json().then(body=>{\n if(!response.ok){context.grafana.notifyError(['Radio profile',JSON.stringify(body)]);return;}\n const sensor=context.grafana.templateService.replace('${sensor_id}');\n window.dispatchEvent(new CustomEvent('lorahome-radio-transition',{detail:{sensor,pending:true}}));\n context.panel.disableSubmit();\n context.panel.patchFormValue({radioPreview:'Transition pending or unconfirmed; awaiting authenticated telemetry.'});\n context.grafana.notifyWarning(['Radio profile','Command ID: '+body.commandId+'. Requested profile is not yet confirmed.']);\n}).catch(()=>context.grafana.notifyError(['Radio profile','Invalid response']));",
+          "confirm": true,
+          "contentType": "application/json",
+          "getPayload": "const recentValue = (name, maxAge) => {\n  const frame = context.panel.data.series.find(s => s.fields.some(f => f.name === name));\n  const valueField = frame?.fields.find(f => f.name === name);\n  const timeField = frame?.fields.find(f => f.type === 'time' || f.name === '_time');\n  const value = valueField?.values?.get?.(valueField.values.length-1) ?? valueField?.values?.[valueField.values.length-1];\n  const at = timeField?.values?.get?.(timeField.values.length-1) ?? timeField?.values?.[timeField.values.length-1];\n  const age = Date.now() - Number(at);\n  return Number.isFinite(age) && age >= -30000 && age <= maxAge ? value : undefined;\n};\nconst devEligible = () => recentValue('sensorOnline',300000) === true && recentValue('sensorDevMode',900000) === 1 && recentValue('gatewayFresh',300000) !== undefined;\nif(!devEligible())throw Error('Radio changes require recent online Development-mode status');\nconst preset=context.panel.elements.find(e=>e.id==='radioProfilePreset')?.value;if(!['fast','default','range'].includes(preset))throw Error('Select a valid preset');return {radioProfilePreset:preset};",
+          "header": [
+            {
+              "name": "Authorization",
+              "value": {{ ("Bearer " ~ control_api_token) | to_json }}
+            }
+          ],
+          "method": "POST",
+          "payload": {},
+          "payloadMode": "custom",
+          "url": "https://{{ control_api_host }}/api/v1/sensors/${sensor_id}/config"
+        },
+        "updateEnabled": "auto"
+      },
+      "pluginVersion": "5.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\" and (r._field == \"radio_available\" or r._field == \"radio_spreading_factor\" or r._field == \"radio_bandwidth_khz\" or r._field == \"radio_coding_rate\")) |> last() |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1)",
+          "refId": "B"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\" and r._field == \"online\") |> last() |> keep(columns: [\"_time\", \"_value\"]) |> rename(columns: {_value: \"sensorOnline\"})"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"isDevMode\") |> last() |> keep(columns: [\"_time\", \"_value\"]) |> rename(columns: {_value: \"sensorDevMode\"})"
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"uptime\") |> last() |> keep(columns: [\"_time\", \"_value\"]) |> rename(columns: {_value: \"gatewayFresh\"})"
+        }
+      ],
+      "title": "Radio profile preset",
+      "transparent": true,
+      "type": "volkovlabs-form-panel"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "id": 5,
+      "options": {
+        "buttonGroup": {
+          "orientation": "right",
+          "size": "md"
+        },
+        "confirmModal": {
+          "body": "Submit the changed Sensor settings? CPU changes require confirmed online Development mode and must be sent separately from mode changes. Individual settings may apply before the whole command is confirmed.",
+          "cancel": "Cancel",
+          "columns": {
+            "include": [
+              "name",
+              "oldValue",
+              "newValue"
+            ],
+            "name": "Label",
+            "newValue": "New Value",
+            "oldValue": "Old Value"
+          },
+          "confirm": "Confirm",
+          "elementDisplayMode": "modified",
+          "title": "Confirm device changes"
+        },
+        "elementValueChanged": "const recentValue = (name, maxAge) => {\n  const frame = context.panel.data.series.find(s => s.fields.some(f => f.name === name));\n  const value = frame?.fields.find(f => f.name === name), time = frame?.fields.find(f => f.type === 'time' || f.name === '_time');\n  const v = value?.values?.get?.(value.values.length-1) ?? value?.values?.[value.values.length-1];\n  const at = time?.values?.get?.(time.values.length-1) ?? time?.values?.[time.values.length-1];\n  const age = Date.now() - Number(at); return Number.isFinite(age) && age >= -30000 && age <= maxAge ? v : undefined;\n};\nconst sleepMinimum = () => {\n  const frame = context.panel.data.series.find(s => s.refId === 'F' && s.fields.some(f => f.name === 'radio_available'));\n  const field = name => { const f = frame?.fields.find(x => x.name === name); return f?.values?.get?.(f.values.length - 1) ?? f?.values?.[f.values.length - 1]; };\n  const age = Date.now() - Number(field('_time'));\n  const sf = field('radio_spreading_factor'), bw = field('radio_bandwidth_khz'), cr = field('radio_coding_rate');\n  if (!Number.isFinite(age) || age < -30000 || age > 300000 || field('radio_available') !== true || !Number.isInteger(sf) || sf < 7 || sf > 12 || ![7.8,10.4,15.6,20.8,31.25,41.7,62.5,125,250,500].includes(bw) || !Number.isInteger(cr) || cr < 5 || cr > 8) return undefined;\n  const currentMode = recentValue('sensorDevMode', 900000);\n  const mode = context.panel.elements?.find(e => e.id === 'defaultDevMode');\n  const selectedMode = context.element?.id === 'defaultDevMode' ? context.element.value : mode?.value;\n  if ((currentMode !== 0 && currentMode !== 1) || typeof selectedMode !== 'boolean') return undefined;\n  const air = bytes => { const t = Math.pow(2, sf) / (bw * 1000), de = t >= 0.016 ? 1 : 0; return (12.25 + 8 + Math.max(Math.ceil((8 * bytes - 4 * sf + 44) / (4 * (sf - 2 * de))) * cr, 0)) * t; };\n  return Math.max(10, Math.ceil(99 * Math.max(air(selectedMode || currentMode === 1 ? 45 : 34), air(10))));\n};\nif (context.element?.id === 'defaultSleepSeconds' || context.element?.id === 'defaultDevMode') {\nconst minimum = sleepMinimum();\nif (context.panel.onChangeElements && context.panel.elements) context.panel.onChangeElements(context.panel.elements.map(e => {\n  const value = context.element?.id === e.id ? context.element.value : e.value;\n  if (e.id === 'defaultSleepSeconds') return {...e, value, min: minimum === undefined ? 10 : minimum};\n  if (e.id === 'sleepMinimumStatus') return {...e, value: minimum === undefined ? 'Unavailable: recent radio profile and mode required' : minimum > 255 ? 'Unavailable: minimum exceeds 255 seconds' : `Minimum: ${minimum} s`};\n  return context.element?.id === e.id ? {...e, value} : e;\n}));\n}\nif(context.element?.id!=='sensorCommandRecovery')return;\nif(!Array.isArray(context.element.value)||!context.element.value.includes('acknowledge'))return;\nif(!window.confirm('Acknowledge the uncertain Sensor command after inspecting the reported settings? This does not mark it applied or resend it.')){context.panel.patchFormValue({sensorCommandRecovery:[]});return;}\nconst sensor=context.grafana.templateService.replace('${sensor_id}');localStorage.removeItem('lorahome-sensor-settings:'+sensor);\ncontext.panel.patchFormValue({sensorCommandRecovery:[],sensorCommandStatus:'Uncertain command acknowledged; inspect reported settings'});context.panel.enableSubmit();",
+        "elements": [
+          {
+            "id": "defaultSleepSeconds",
+            "labelWidth": 20,
+            "max": 255,
+            "min": 10,
+            "queryField": {
+              "label": "defaultSleepSeconds",
+              "refId": "A",
+              "value": "defaultSleepSeconds"
+            },
+            "section": "",
+            "showIf": "",
+            "title": "Sleep (seconds)",
+            "tooltip": "Minimum is calculated from the recent Sensor radio profile and Operation/Development mode.",
+            "type": "number",
+            "uid": "c2c2cff4-3b2c-49c8-913c-0787ce3fb5cf",
+            "unit": "",
+            "value": 10
+          },
+          {
+            "id": "sleepMinimumStatus",
+            "uid": "sensor-sleep-minimum",
+            "type": "disabled",
+            "title": "Minimum sleep",
+            "labelWidth": 20,
+            "section": "",
+            "value": "Waiting for Sensor radio profile"
+          },
+          {
+            "allowCustomValue": false,
+            "getOptions": "return Array.from({ length: 14 }, (_, i) => {\r\n  const value = i + 2;\r\n  return { label: `${value} dBm`, value };\r\n});",
+            "id": "defaultTxPower",
+            "labelWidth": 20,
+            "options": [
+              {
+                "id": "_",
+                "label": "",
+                "type": "number",
+                "value": ""
+              }
+            ],
+            "optionsSource": "Code",
+            "section": "",
+            "title": "Transmit power (dBm)",
+            "tooltip": "",
+            "type": "select",
+            "uid": "2c4c464e-479a-400b-9795-61445f9f36e9",
+            "unit": "",
+            "value": 2
+          },
+          {
+            "id": "defaultDevMode",
+            "labelWidth": 20,
+            "queryField": {
+              "label": "defaultDevMode",
+              "refId": "A",
+              "value": "defaultDevMode"
+            },
+            "section": "",
+            "title": "Development mode",
+            "tooltip": "",
+            "type": "boolean",
+            "uid": "c5903ed9-7dcf-4147-a2bd-1cdae98e1aed",
+            "unit": "",
+            "value": false
+          },
+          {
+            "allowCustomValue": false,
+            "getOptions": "return [80, 160, 240].map(value => ({\r\n  label: `${value} MHz`,\r\n  value\r\n}));",
+            "id": "defaultCpuFrequencyMhz",
+            "labelWidth": 20,
+            "options": [],
+            "optionsSource": "Code",
+            "section": "",
+            "title": "CPU MHz",
+            "tooltip": "CPU changes require a recently confirmed online Sensor in Development mode. Submit mode changes separately.",
+            "type": "select",
+            "uid": "4951a52c-bfdc-49a7-bca7-0a7f942ecf04",
+            "unit": "",
+            "value": 80,
+            "queryField": {
+              "label": "defaultCpuFrequencyMhz",
+              "refId": "C",
+              "value": "defaultCpuFrequencyMhz"
+            },
+            "disableIf": "const status=context.panel.elements.find(e=>e.id==='sensorModeStatus')?.value;const mode=context.panel.elements.find(e=>e.id==='defaultDevMode')?.value;return status!=='Development confirmed' || mode!==true;"
+          },
+          {
+            "id": "sensorModeStatus",
+            "uid": "sensor-mode-confirmation",
+            "type": "disabled",
+            "title": "CPU eligibility",
+            "labelWidth": 20,
+            "section": "",
+            "value": "Waiting for Sensor status"
+          },
+          {
+            "id": "sensorCommandStatus",
+            "uid": "sensor-command-status",
+            "type": "disabled",
+            "title": "Sensor command",
+            "labelWidth": 20,
+            "section": "",
+            "value": "No command pending"
+          },
+          {
+            "id": "sensorCommandRecovery",
+            "uid": "sensor-command-recovery",
+            "type": "checkboxList",
+            "title": "Command recovery",
+            "labelWidth": 20,
+            "section": "",
+            "optionsSource": "Custom",
+            "options": [
+              {
+                "label": "Acknowledge uncertain command after inspection",
+                "value": "acknowledge",
+                "type": "string"
+              }
+            ],
+            "value": []
+          }
+        ],
+        "initial": {
+          "code": "const recentValue = (name, maxAge) => {\n  const frame = context.panel.data.series.find(s => s.fields.some(f => f.name === name));\n  const valueField = frame?.fields.find(f => f.name === name);\n  const timeField = frame?.fields.find(f => f.type === 'time' || f.name === '_time');\n  const value = valueField?.values?.get?.(valueField.values.length-1) ?? valueField?.values?.[valueField.values.length-1];\n  const at = timeField?.values?.get?.(timeField.values.length-1) ?? timeField?.values?.[timeField.values.length-1];\n  const age = Date.now() - Number(at);\n  return Number.isFinite(age) && age >= -30000 && age <= maxAge ? value : undefined;\n};\nconst devEligible = () => recentValue('sensorOnline',300000) === true && recentValue('sensorDevMode',900000) === 1 && recentValue('gatewayFresh',300000) !== undefined;\nconst sleepMinimum = () => {\n  const frame = context.panel.data.series.find(s => s.refId === 'F' && s.fields.some(f => f.name === 'radio_available'));\n  const field = name => { const f = frame?.fields.find(x => x.name === name); return f?.values?.get?.(f.values.length - 1) ?? f?.values?.[f.values.length - 1]; };\n  const age = Date.now() - Number(field('_time'));\n  const sf = field('radio_spreading_factor'), bw = field('radio_bandwidth_khz'), cr = field('radio_coding_rate');\n  if (!Number.isFinite(age) || age < -30000 || age > 300000 || field('radio_available') !== true || !Number.isInteger(sf) || sf < 7 || sf > 12 || ![7.8,10.4,15.6,20.8,31.25,41.7,62.5,125,250,500].includes(bw) || !Number.isInteger(cr) || cr < 5 || cr > 8) return undefined;\n  const currentMode = recentValue('sensorDevMode', 900000);\n  const mode = context.panel.elements?.find(e => e.id === 'defaultDevMode');\n  const selectedMode = context.element?.id === 'defaultDevMode' ? context.element.value : mode?.value;\n  if ((currentMode !== 0 && currentMode !== 1) || typeof selectedMode !== 'boolean') return undefined;\n  const air = bytes => { const t = Math.pow(2, sf) / (bw * 1000), de = t >= 0.016 ? 1 : 0; return (12.25 + 8 + Math.max(Math.ceil((8 * bytes - 4 * sf + 44) / (4 * (sf - 2 * de))) * cr, 0)) * t; };\n  return Math.max(10, Math.ceil(99 * Math.max(air(selectedMode || currentMode === 1 ? 45 : 34), air(10))));\n};\nconst minimum = sleepMinimum();\nif (context.panel.onChangeElements && context.panel.elements) context.panel.onChangeElements(context.panel.elements.map(e => {\n  const value = context.element?.id === e.id ? context.element.value : e.value;\n  if (e.id === 'defaultSleepSeconds') return {...e, value, min: minimum === undefined ? 10 : minimum};\n  if (e.id === 'sleepMinimumStatus') return {...e, value: minimum === undefined ? 'Unavailable: recent radio profile and mode required' : minimum > 255 ? 'Unavailable: minimum exceeds 255 seconds' : `Minimum: ${minimum} s`};\n  return context.element?.id === e.id ? {...e, value} : e;\n}));\nconst cpu = recentValue('defaultCpuFrequencyMhz',900000);\ncontext.panel.patchFormValue({sensorModeStatus: devEligible() && Number.isInteger(cpu) ? 'Development confirmed' : 'CPU unavailable: confirm online Development mode and recent CPU telemetry'});\nconst sensor=context.grafana.templateService.replace('${sensor_id}');\nconst id=localStorage.getItem('lorahome-sensor-settings:'+sensor);\nif(!id){context.panel.patchFormValue({sensorCommandStatus:'No command pending'});context.panel.enableSubmit();return;}\ncontext.panel.disableSubmit();\nconst base=context.grafana.templateService.replace(context.panel.options.update.url).replace(/\\/config$/, '');\nconst auth=context.panel.options.update.header.find(h=>h.name==='Authorization')?.value;\nreturn fetch(base+'/commands/'+encodeURIComponent(id),{headers:{Authorization:auth},cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject(Error('Status unavailable'))).then(result=>{\n if(result.status==='applied'){localStorage.removeItem('lorahome-sensor-settings:'+sensor);context.panel.patchFormValue({sensorCommandStatus:'Applied: complete requested state confirmed'});context.panel.enableSubmit();return;}\n if(['failed','rejected','expired','superseded'].includes(result.status)){localStorage.removeItem('lorahome-sensor-settings:'+sensor);context.panel.patchFormValue({sensorCommandStatus:'Command '+result.status+'; individual settings may already have changed'});context.panel.enableSubmit();return;}\n context.panel.patchFormValue({sensorCommandStatus:'Pending: '+result.status+'; individual settings may already have changed'});\n}).catch(()=>context.panel.patchFormValue({sensorCommandStatus:'Command status unavailable; inspect Sensor settings'}));",
+          "contentType": "application/json",
+          "datasource": "",
+          "getPayload": "return {}",
+          "highlight": false,
+          "highlightColor": "green",
+          "method": "query",
+          "payload": {}
+        },
+        "layout": {
+          "orientation": "vertical",
+          "padding": 10,
+          "sectionVariant": "default",
+          "sections": [],
+          "variant": "single"
+        },
+        "reset": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "process",
+          "text": "Reset",
+          "variant": "hidden"
+        },
+        "resetAction": {
+          "code": "",
+          "confirm": false,
+          "getPayload": "return {}",
+          "mode": "initial",
+          "payload": {}
+        },
+        "saveDefault": {
+          "icon": "save",
+          "text": "Save Default",
+          "variant": "hidden"
+        },
+        "submit": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "cloud-upload",
+          "text": "Send changed values",
+          "variant": "primary"
+        },
+        "sync": true,
+        "update": {
+          "code": "const response=context.panel.response;if(!response){context.grafana.notifyError(['Sensor settings','Request failed']);return;}\nreturn response.clone().json().then(body=>{if(!response.ok){context.grafana.notifyError(['Sensor settings',JSON.stringify(body)]);return;}const sensor=context.grafana.templateService.replace('${sensor_id}');localStorage.setItem('lorahome-sensor-settings:'+sensor,body.commandId);context.panel.patchFormValue({sensorCommandStatus:'Pending: published; individual settings may already have changed'});context.panel.disableSubmit();context.grafana.notifyWarning(['Sensor settings','Command sent; awaiting complete confirmation. ID: '+body.commandId]);}).catch(()=>context.grafana.notifyError(['Sensor settings','Invalid response']));",
+          "confirm": true,
+          "contentType": "application/json",
+          "getPayload": "const recentValue = (name, maxAge) => {\n  const frame = context.panel.data.series.find(s => s.fields.some(f => f.name === name));\n  const valueField = frame?.fields.find(f => f.name === name);\n  const timeField = frame?.fields.find(f => f.type === 'time' || f.name === '_time');\n  const value = valueField?.values?.get?.(valueField.values.length-1) ?? valueField?.values?.[valueField.values.length-1];\n  const at = timeField?.values?.get?.(timeField.values.length-1) ?? timeField?.values?.[timeField.values.length-1];\n  const age = Date.now() - Number(at);\n  return Number.isFinite(age) && age >= -30000 && age <= maxAge ? value : undefined;\n};\nconst devEligible = () => recentValue('sensorOnline',300000) === true && recentValue('sensorDevMode',900000) === 1 && recentValue('gatewayFresh',300000) !== undefined;\nconst sensor=context.grafana.templateService.replace('${sensor_id}');\nif(localStorage.getItem('lorahome-sensor-settings:'+sensor))throw Error('Previous Sensor command is unresolved; inspect or acknowledge it first');\nconst initial=context.panel.initial||{}, fields=['defaultSleepSeconds','defaultDevMode','defaultTxPower','defaultCpuFrequencyMhz'];\nconst output={};\nfor(const name of fields){const element=context.panel.elements.find(e=>e.id===name);const old=initial[name];if(!element)continue;if(old===undefined||old===null){if(name==='defaultCpuFrequencyMhz')continue;throw Error('Current Sensor settings unavailable');}if(element.value!==old)output[name]=element.value;}\nif('defaultCpuFrequencyMhz' in output){if(!devEligible()||!Number.isInteger(recentValue('defaultCpuFrequencyMhz',900000)))throw Error('CPU changes require recent online Development-mode and CPU telemetry');if('defaultDevMode' in output)throw Error('Submit the mode change separately and wait for confirmation before changing CPU');}\nconst sleepMinimum = () => {\n  const frame = context.panel.data.series.find(s => s.refId === 'F' && s.fields.some(f => f.name === 'radio_available'));\n  const field = name => { const f = frame?.fields.find(x => x.name === name); return f?.values?.get?.(f.values.length - 1) ?? f?.values?.[f.values.length - 1]; };\n  const age = Date.now() - Number(field('_time'));\n  const sf = field('radio_spreading_factor'), bw = field('radio_bandwidth_khz'), cr = field('radio_coding_rate');\n  if (!Number.isFinite(age) || age < -30000 || age > 300000 || field('radio_available') !== true || !Number.isInteger(sf) || sf < 7 || sf > 12 || ![7.8,10.4,15.6,20.8,31.25,41.7,62.5,125,250,500].includes(bw) || !Number.isInteger(cr) || cr < 5 || cr > 8) return undefined;\n  const currentMode = recentValue('sensorDevMode', 900000);\n  const mode = context.panel.elements?.find(e => e.id === 'defaultDevMode');\n  const selectedMode = context.element?.id === 'defaultDevMode' ? context.element.value : mode?.value;\n  if ((currentMode !== 0 && currentMode !== 1) || typeof selectedMode !== 'boolean') return undefined;\n  const air = bytes => { const t = Math.pow(2, sf) / (bw * 1000), de = t >= 0.016 ? 1 : 0; return (12.25 + 8 + Math.max(Math.ceil((8 * bytes - 4 * sf + 44) / (4 * (sf - 2 * de))) * cr, 0)) * t; };\n  return Math.max(10, Math.ceil(99 * Math.max(air(selectedMode || currentMode === 1 ? 45 : 34), air(10))));\n};\nif ('defaultSleepSeconds' in output || 'defaultDevMode' in output) {\n  const minimum = sleepMinimum();\n  if (minimum === undefined) throw Error('Recent confirmed Sensor radio profile and mode required to validate sleep');\n  if (minimum > 255) throw Error('Minimum sleep for this radio profile exceeds 255 seconds');\n  const sleep = context.panel.elements.find(e => e.id === 'defaultSleepSeconds')?.value;\n  if (!Number.isInteger(sleep) || sleep < minimum || sleep > 255) throw Error(`Sleep must be between ${minimum} and 255 seconds for the current radio profile and mode`);\n}\nif(!Object.keys(output).length)throw Error('No changed Sensor settings');return output;",
+          "header": [
+            {
+              "name": "Authorization",
+              "value": {{ ("Bearer " ~ control_api_token) | to_json }}
+            }
+          ],
+          "method": "POST",
+          "payload": {},
+          "payloadMode": "custom",
+          "url": "https://{{ control_api_host }}/api/v1/sensors/${sensor_id}/config"
+        },
+        "updateEnabled": "auto"
+      },
+      "pluginVersion": "5.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -30d) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and (r._field == \"sleepInterval\" or r._field == \"isDevMode\" or r._field == \"txPower\")) |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, defaultSleepSeconds: r.sleepInterval, defaultDevMode: r.isDevMode == 1, defaultTxPower: r.txPower}))",
+          "refId": "A"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\" and r._field == \"online\") |> last() |> keep(columns: [\"_time\", \"_value\"]) |> rename(columns: {_value: \"sensorOnline\"})"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_diagnostics\" and r.sensor_id == \"${sensor_id}\" and r._field == \"cpuFrequencyMhz\") |> last() |> keep(columns: [\"_time\", \"_value\"]) |> rename(columns: {_value: \"defaultCpuFrequencyMhz\"})"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"isDevMode\") |> last() |> keep(columns: [\"_time\", \"_value\"]) |> rename(columns: {_value: \"sensorDevMode\"})"
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"uptime\") |> last() |> keep(columns: [\"_time\", \"_value\"]) |> rename(columns: {_value: \"gatewayFresh\"})"
+        },
+        {
+          "refId": "F",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\" and (r._field == \"radio_available\" or r._field == \"radio_spreading_factor\" or r._field == \"radio_bandwidth_khz\" or r._field == \"radio_coding_rate\")) |> last() |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1)"
+        }
+      ],
+      "title": "Sensor settings",
+      "transparent": true,
+      "type": "volkovlabs-form-panel"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "id": 8,
+      "options": {
+        "buttonGroup": {
+          "orientation": "right",
+          "size": "md"
+        },
+        "confirmModal": {
+          "body": "The Sensor must be online and confirmed in Development mode. Send a mode change separately and wait for confirmation before changing the radio profile.",
+          "cancel": "Cancel",
+          "columns": {
+            "include": [
+              "name",
+              "oldValue",
+              "newValue"
+            ],
+            "name": "Label",
+            "newValue": "New Value",
+            "oldValue": "Old Value"
+          },
+          "confirm": "Confirm",
+          "elementDisplayMode": "modified",
+          "title": "Confirm device changes"
+        },
+        "elementValueChanged": "const recentValue = (name, maxAge) => {\n  const frame = context.panel.data.series.find(s => s.fields.some(f => f.name === name));\n  const valueField = frame?.fields.find(f => f.name === name);\n  const timeField = frame?.fields.find(f => f.type === 'time' || f.name === '_time');\n  const value = valueField?.values?.get?.(valueField.values.length-1) ?? valueField?.values?.[valueField.values.length-1];\n  const at = timeField?.values?.get?.(timeField.values.length-1) ?? timeField?.values?.[timeField.values.length-1];\n  const age = Date.now() - Number(at);\n  return Number.isFinite(age) && age >= -30000 && age <= maxAge ? value : undefined;\n};\nconst devEligible = () => recentValue('sensorOnline',300000) === true && recentValue('sensorDevMode',900000) === 1 && recentValue('gatewayFresh',300000) !== undefined;\nif (context.element?.id === 'radioPreview') return;\nconst sensor = context.grafana.templateService.replace('${sensor_id}');\nconst base = context.grafana.templateService.replace(context.panel.options.update.url).replace(/\\/config$/, '');\nconst auth = context.panel.options.update.header.find(h => h.name === 'Authorization')?.value;\nconst headers = {Authorization: auth};\nconst getPending = () => fetch(base + '/radio-transition', {headers, cache: 'no-store'}).then(r => r.ok ? r.json() : Promise.reject(Error('Transition status unavailable')));\nif (context.element?.id === 'radioRecovery') {\n  const selected = context.element.value || [];\n  context.panel.patchFormValue({radioRecovery: []});\n  if (selected.includes('refresh')) { context.panel.initialRequest(); return; }\n  if (!selected.includes('acknowledge')) return;\n  if (!window.confirm('Acknowledge the unresolved transition after following local recovery instructions? This does not confirm or resend the command.')) return;\n  context.panel.disableSubmit();\n  return getPending().then(result => {\n    if (!result.pending) return;\n    return fetch(base + '/radio-transition/' + encodeURIComponent(result.pending.commandId) + '/acknowledge', {method:'POST', headers}).then(r => {if (!r.ok) throw Error('Acknowledgement failed');});\n  }).then(() => {\n    window.dispatchEvent(new CustomEvent('lorahome-radio-transition', {detail:{sensor, pending:false}}));\n  }).catch(() => {context.panel.disableSubmit(); context.panel.patchFormValue({radioPreview:'Recovery acknowledgement failed; retry'});});\n}\ncontext.panel.disableSubmit();\nreturn getPending().then(result => {\n if (result.pending) {context.panel.patchFormValue({radioPreview:'Transition '+result.pending.status+' (ID: '+result.pending.commandId+'); refresh status or acknowledge recovery after inspection.'}); return;}\n if(!devEligible()){context.panel.patchFormValue({radioPreview:'Unavailable: Sensor must be online and confirmed in Development mode'});return;}\n\n\nconst values = context.panel.formValue();\nconst selected = [\n  Number(values.spreadingFactor),\n  Number(values.bandwidthKhz),\n  Number(values.codingRate)\n];\n\nconst bandwidths = [7.8, 10.4, 15.6, 20.8, 31.25, 41.7, 62.5, 125, 250, 500];\nconst [sf, bw, cr] = selected;\n\nif (\n  !Number.isInteger(sf) || sf < 7 || sf > 12 ||\n  !bandwidths.includes(bw) ||\n  !Number.isInteger(cr) || cr < 5 || cr > 8\n) {\n  context.panel.patchFormValue({ radioPreview: 'Select a valid profile' });\n  context.panel.disableSubmit();\n  return;\n}\n\nconst air = (bytes, profile) => {\n  const [s, b, c] = profile;\n  const t = Math.pow(2, s) / (b * 1000);\n  const de = t >= 0.016 ? 1 : 0;\n  const symbols = 8 + Math.max(\n    Math.ceil((8 * bytes - 4 * s + 44) / (4 * (s - 2 * de))) * c,\n    0\n  );\n  return (12.25 + symbols) * t;\n};\n\nconst op = air(34, selected);\nconst dev = air(45, selected);\nconst ack = air(10, selected);\nconst minOp = Math.max(10, Math.ceil(99 * Math.max(op, ack)));\nconst minDev = Math.max(10, Math.ceil(99 * Math.max(dev, ack)));\n\nif (minOp > 255 || minDev > 255) {\n  context.panel.patchFormValue({\n    radioPreview: 'Unsupported: minimum sleep exceeds 255 s'\n  });\n  context.panel.disableSubmit();\n  return;\n}\n\nconst fields = context.panel.data.series.flatMap(s => s.fields);\nconst field = name => {\n  const f = fields.find(x => x.name === name);\n  return f?.values?.get?.(f.values.length - 1)\n    ?? f?.values?.[f.values.length - 1];\n};\n\nlet comparison = 'estimated radio airtime change: N/A; estimated TX consumption: N/A';\nconst current = field('radio_available') === true\n  ? [\n    field('radio_spreading_factor'),\n    field('radio_bandwidth_khz'),\n    field('radio_coding_rate')\n  ]\n  : null;\n\nconst baselineTime = Number(field('_time'));\nconst baselineLabel = Number.isFinite(baselineTime) && baselineTime > 0 ? `last reported ${new Date(baselineTime).toLocaleString()}${Date.now()-baselineTime>300000?' (stale)':''}` : 'report time unavailable';\nif (current?.every(Number.isFinite)) {\n  const ratios = [op / air(34, current), dev / air(45, current)];\n  const pct = ratios.map(r => {\n    const change = Math.round((r - 1) * 100);\n    return `${change >= 0 ? '+' : ''}${change}%`;\n  }).join('/');\n  const multiplier = ratios.map(r => `x${Number(r.toFixed(2))}`).join('/');\n\n  comparison = `estimated radio airtime change: ${pct}; estimated TX consumption: ${multiplier}`;\n}\n\ncontext.panel.patchFormValue({\n  radioPreview: `Minimum sleep: ${minOp}/${minDev} s; ${comparison} (Operation/Development); baseline ${baselineLabel}.`\n});\ncontext.panel.enableSubmit();\n}).catch(() => {context.panel.disableSubmit();context.panel.patchFormValue({radioPreview:'Transition status unavailable; retry before submitting'});});",
+        "elements": [
+          {
+            "allowCustomValue": false,
+            "getOptions": "return [7, 8, 9, 10, 11, 12].map(value => ({\r\n  label: `SF${value}`,\r\n  value\r\n}));",
+            "id": "spreadingFactor",
+            "labelWidth": 20,
+            "options": [],
+            "optionsSource": "Code",
+            "section": "",
+            "title": "Spreading factor",
+            "tooltip": "Requires recent online Sensor status and confirmed Development mode.",
+            "type": "select",
+            "uid": "d530ee90-c977-4120-93c8-658b37049aaf",
+            "unit": "",
+            "value": 9
+          },
+          {
+            "allowCustomValue": false,
+            "id": "bandwidthKhz",
+            "labelWidth": 20,
+            "max": 500,
+            "min": 7.8,
+            "options": [
+              {
+                "id": 7.8,
+                "label": "7.8",
+                "value": 7.8
+              },
+              {
+                "id": 10.4,
+                "label": "10.4",
+                "value": 10.4
+              },
+              {
+                "id": 15.6,
+                "label": "15.6",
+                "value": 15.6
+              },
+              {
+                "id": 20.8,
+                "label": "20.8",
+                "value": 20.8
+              },
+              {
+                "id": 31.25,
+                "label": "31.25",
+                "value": 31.25
+              },
+              {
+                "id": 41.7,
+                "label": "41.7",
+                "value": 41.7
+              },
+              {
+                "id": 62.5,
+                "label": "62.5",
+                "value": 62.5
+              },
+              {
+                "id": 125,
+                "label": "125",
+                "value": 125
+              },
+              {
+                "id": 250,
+                "label": "250",
+                "value": 250
+              },
+              {
+                "id": 500,
+                "label": "500",
+                "value": 500
+              }
+            ],
+            "optionsSource": "Custom",
+            "section": "",
+            "showIf": "",
+            "title": "Bandwidth (kHz)",
+            "tooltip": "Requires recent online Sensor status and confirmed Development mode.",
+            "type": "select",
+            "uid": "8b083594-43bd-4569-ba08-fdae43ee0e6b",
+            "unit": "",
+            "value": 125
+          },
+          {
+            "allowCustomValue": false,
+            "id": "codingRate",
+            "labelWidth": 20,
+            "max": 8,
+            "min": 5,
+            "options": [
+              {
+                "id": 5,
+                "label": "4/5",
+                "value": 5
+              },
+              {
+                "id": 6,
+                "label": "4/6",
+                "value": 6
+              },
+              {
+                "id": 7,
+                "label": "4/7",
+                "value": 7
+              },
+              {
+                "id": 8,
+                "label": "4/8",
+                "value": 8
+              }
+            ],
+            "optionsSource": "Custom",
+            "section": "",
+            "showIf": "",
+            "title": "Coding rate",
+            "tooltip": "Requires recent online Sensor status and confirmed Development mode.",
+            "type": "select",
+            "uid": "8246dddb-871c-4040-a1bc-0b3b08b0e91f",
+            "unit": "",
+            "value": 5
+          },
+          {
+            "id": "radioPreview",
+            "labelWidth": 20,
+            "options": [],
+            "optionsSource": "Custom",
+            "section": "",
+            "title": "Estiamtes",
+            "tooltip": "Estimates based on airtime changes, not actual battery consumption. Values OP/DEV",
+            "type": "disabled",
+            "uid": "radio-preview-custom-radio-profile",
+            "unit": "",
+            "value": "Select a profile"
+          },
+          {
+            "id": "radioRecovery",
+            "uid": "radio-recovery-8",
+            "type": "checkboxList",
+            "title": "Transition status",
+            "labelWidth": 20,
+            "section": "",
+            "optionsSource": "Custom",
+            "options": [
+              {
+                "label": "Refresh transition status",
+                "value": "refresh",
+                "type": "string"
+              },
+              {
+                "label": "Acknowledge uncertainty after local recovery",
+                "value": "acknowledge",
+                "type": "string"
+              }
+            ],
+            "value": []
+          }
+        ],
+        "initial": {
+          "code": "const recentValue = (name, maxAge) => {\n  const frame = context.panel.data.series.find(s => s.fields.some(f => f.name === name));\n  const valueField = frame?.fields.find(f => f.name === name);\n  const timeField = frame?.fields.find(f => f.type === 'time' || f.name === '_time');\n  const value = valueField?.values?.get?.(valueField.values.length-1) ?? valueField?.values?.[valueField.values.length-1];\n  const at = timeField?.values?.get?.(timeField.values.length-1) ?? timeField?.values?.[timeField.values.length-1];\n  const age = Date.now() - Number(at);\n  return Number.isFinite(age) && age >= -30000 && age <= maxAge ? value : undefined;\n};\nconst devEligible = () => recentValue('sensorOnline',300000) === true && recentValue('sensorDevMode',900000) === 1 && recentValue('gatewayFresh',300000) !== undefined;\nconst sensor = context.grafana.templateService.replace('${sensor_id}');\nconst base = context.grafana.templateService.replace(context.panel.options.update.url).replace(/\\/config$/, '');\nconst auth = context.panel.options.update.header.find(h => h.name === 'Authorization')?.value;\nconst headers = {Authorization: auth};\nconst getPending = () => fetch(base + '/radio-transition', {headers, cache: 'no-store'}).then(r => r.ok ? r.json() : Promise.reject(Error('Transition status unavailable')));\nconst timerKey = '__lorahomeRadioTimer' + \"8\";\nconst dashboardPath = window.location.pathname;\nconst stopPolling = () => { if (window[timerKey]) {window.clearInterval(window[timerKey]); delete window[timerKey];} };\nstopPolling();\nconst startPolling = () => {\n  if (window[timerKey]) return;\n  let checking = false;\n  window[timerKey] = window.setInterval(() => {\n    if (window.location.pathname !== dashboardPath) {stopPolling(); return;}\n    if (checking || document.visibilityState === 'hidden') return;\n    checking = true;\n    getPending().then(result => {\n      if (!result.pending) {\n        stopPolling();\n        window.dispatchEvent(new CustomEvent('lorahome-radio-transition', {detail:{sensor, pending:false}}));\n      } else context.panel.patchFormValue({radioPreview:'Transition ' + result.pending.status + ' (ID: ' + result.pending.commandId + '); waiting for confirmation.'});\n    }).catch(() => {}).finally(() => {checking = false;});\n  }, 5000);\n};\nconst listenerKey = '__lorahomeRadioListener' + \"8\";\nif (window[listenerKey]) window.removeEventListener('lorahome-radio-transition', window[listenerKey]);\nwindow[listenerKey] = event => {\n  if (event.detail?.sensor !== sensor) return;\n  if (event.detail.pending) {\n    context.panel.disableSubmit();\n    context.panel.patchFormValue({radioPreview: 'Radio transition pending; refresh status or acknowledge recovery after inspection.'});\n    startPolling();\n  } else {stopPolling(); context.panel.initialRequest();}\n};\nwindow.addEventListener('lorahome-radio-transition', window[listenerKey]);\nconst fields = context.panel.data.series.flatMap(s => s.fields);\nconst field = name => { const f = fields.find(x => x.name === name); return f?.values?.get?.(f.values.length-1) ?? f?.values?.[f.values.length-1]; };\nconst sf=field('radio_spreading_factor'), bw=field('radio_bandwidth_khz'), cr=field('radio_coding_rate'), at=field('_time');\nconst valid = field('radio_available') === true && [sf,bw,cr].every(Number.isFinite);\ncontext.panel.disableSubmit();\nreturn getPending().then(result => {\n  if (result.pending) {\n    startPolling();\n    context.panel.patchFormValue({radioPreview: 'Transition ' + result.pending.status + ' (ID: ' + result.pending.commandId + '); refresh status or acknowledge recovery after inspection.'});\n    return;\n  }\n  if (!devEligible()) {context.panel.patchFormValue({radioPreview:'Unavailable: Sensor must be online and confirmed in Development mode'});return;}\n  const timestamp = Number.isFinite(Number(at)) ? new Date(Number(at)).toLocaleString() + (Date.now() - Number(at) > 300000 ? ' (stale)' : '') : 'time unavailable';\n  context.panel.patchFormValue({radioPreview: valid ? `Last reported: SF${sf} / BW${bw} / CR4/${cr} (${timestamp})` : 'Last reported profile: N/A'});\n  context.panel.enableSubmit();\n}).catch(() => { context.panel.disableSubmit(); startPolling(); context.panel.patchFormValue({radioPreview:'Transition status unavailable; retry before submitting'}); });",
+          "contentType": "application/json",
+          "datasource": "",
+          "getPayload": "return {}",
+          "highlight": false,
+          "highlightColor": "green",
+          "method": "query",
+          "payload": {}
+        },
+        "layout": {
+          "orientation": "vertical",
+          "padding": 10,
+          "sectionVariant": "default",
+          "sections": [],
+          "variant": "single"
+        },
+        "reset": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "process",
+          "text": "Reset",
+          "variant": "hidden"
+        },
+        "resetAction": {
+          "code": "",
+          "confirm": false,
+          "getPayload": "return {}",
+          "mode": "initial",
+          "payload": {}
+        },
+        "saveDefault": {
+          "icon": "save",
+          "text": "Save Default",
+          "variant": "hidden"
+        },
+        "submit": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "cloud-upload",
+          "text": "Send changed values",
+          "variant": "primary"
+        },
+        "sync": false,
+        "update": {
+          "code": "const response=context.panel.response;\nif(!response){context.grafana.notifyError(['Radio profile','Request failed']);return;}\nreturn response.clone().json().then(body=>{\n if(!response.ok){context.grafana.notifyError(['Radio profile',JSON.stringify(body)]);return;}\n const sensor=context.grafana.templateService.replace('${sensor_id}');\n window.dispatchEvent(new CustomEvent('lorahome-radio-transition',{detail:{sensor,pending:true}}));\n context.panel.disableSubmit();\n context.panel.patchFormValue({radioPreview:'Transition pending or unconfirmed; awaiting authenticated telemetry.'});\n context.grafana.notifyWarning(['Radio profile','Command ID: '+body.commandId+'. Requested profile is not yet confirmed.']);\n}).catch(()=>context.grafana.notifyError(['Radio profile','Invalid response']));",
+          "confirm": true,
+          "contentType": "application/json",
+          "getPayload": "const recentValue = (name, maxAge) => {\n  const frame = context.panel.data.series.find(s => s.fields.some(f => f.name === name));\n  const valueField = frame?.fields.find(f => f.name === name);\n  const timeField = frame?.fields.find(f => f.type === 'time' || f.name === '_time');\n  const value = valueField?.values?.get?.(valueField.values.length-1) ?? valueField?.values?.[valueField.values.length-1];\n  const at = timeField?.values?.get?.(timeField.values.length-1) ?? timeField?.values?.[timeField.values.length-1];\n  const age = Date.now() - Number(at);\n  return Number.isFinite(age) && age >= -30000 && age <= maxAge ? value : undefined;\n};\nconst devEligible = () => recentValue('sensorOnline',300000) === true && recentValue('sensorDevMode',900000) === 1 && recentValue('gatewayFresh',300000) !== undefined;\nif(!devEligible())throw Error('Radio changes require recent online Development-mode status');\nconst get = id => context.panel.elements.find(e => e.id === id)?.value, s = Number(get('spreadingFactor')), b = Number(get('bandwidthKhz')), c = Number(get('codingRate')); if (!Number.isInteger(s) || s < 7 || s > 12 || ![7.8, 10.4, 15.6, 20.8, 31.25, 41.7, 62.5, 125, 250, 500].includes(b) || !Number.isInteger(c) || c < 5 || c > 8) throw Error('Invalid custom profile'); return { spreadingFactor: s, bandwidthKhz: b, codingRate: c };",
+          "header": [
+            {
+              "name": "Authorization",
+              "value": {{ ("Bearer " ~ control_api_token) | to_json }}
+            }
+          ],
+          "method": "POST",
+          "payload": {},
+          "payloadMode": "custom",
+          "url": "https://{{ control_api_host }}/api/v1/sensors/${sensor_id}/config"
+        },
+        "updateEnabled": "auto"
+      },
+      "pluginVersion": "5.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\" and (r._field == \"radio_available\" or r._field == \"radio_spreading_factor\" or r._field == \"radio_bandwidth_khz\" or r._field == \"radio_coding_rate\")) |> last() |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1)",
+          "refId": "B"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\" and r._field == \"online\") |> last() |> keep(columns: [\"_time\", \"_value\"]) |> rename(columns: {_value: \"sensorOnline\"})"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"isDevMode\") |> last() |> keep(columns: [\"_time\", \"_value\"]) |> rename(columns: {_value: \"sensorDevMode\"})"
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"uptime\") |> last() |> keep(columns: [\"_time\", \"_value\"]) |> rename(columns: {_value: \"gatewayFresh\"})"
+        }
+      ],
+      "title": "Custom radio profile",
+      "transparent": true,
+      "type": "volkovlabs-form-panel"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "id": 228,
+      "panels": [],
+      "title": "Sensor Telemetry",
+      "type": "row",
+      "targets": []
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [
+            {
+              "options": {
+                "Development": {
+                  "color": "orange",
+                  "index": 1,
+                  "text": "Debug Mode"
+                },
+                "Operation": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "Operation mode"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 37
+      },
+      "id": 231,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\")\n  |> range(start: -15m)\n  |> filter(fn: (r) =>\n    r._measurement == \"sensor_reading\" and\n    r.sensor_id == \"${sensor_id}\" and\n    r._field == \"isDevMode\"\n  )\n  |> last()\n  |> map(fn: (r) => ({\n    r with\n    _value: if r._value == 1 then \"Development\" else \"Operation\"\n  }))\n  |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Operation mode",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "mwatt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 37
+      },
+      "id": 41,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "diagnostic = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_diagnostics\" and r.sensor_id == \"${sensor_id}\" and r._field == \"battPower\") |> last() |> group(columns: [\"sensor_id\"])\nmode = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"isDevMode\") |> last() |> group(columns: [\"sensor_id\"])\njoin(tables: {diagnostic: diagnostic, mode: mode}, on: [\"sensor_id\"]) |> filter(fn: (r) => r._value_mode == 1) |> map(fn: (r) => ({_time: r._time_diagnostic, _value: r._value_diagnostic, _field: r._field_diagnostic, sensor_id: r.sensor_id}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Battery power",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "mamp"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 37
+      },
+      "id": 40,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "diagnostic = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_diagnostics\" and r.sensor_id == \"${sensor_id}\" and r._field == \"battCurrent\") |> last() |> group(columns: [\"sensor_id\"])\nmode = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"isDevMode\") |> last() |> group(columns: [\"sensor_id\"])\njoin(tables: {diagnostic: diagnostic, mode: mode}, on: [\"sensor_id\"]) |> filter(fn: (r) => r._value_mode == 1) |> map(fn: (r) => ({_time: r._time_diagnostic, _value: r._value_diagnostic, _field: r._field_diagnostic, sensor_id: r.sensor_id}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Battery current",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 37
+      },
+      "id": 43,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "diagnostic = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_diagnostics\" and r.sensor_id == \"${sensor_id}\" and r._field == \"cpuTemp\") |> last() |> group(columns: [\"sensor_id\"])\nmode = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"isDevMode\") |> last() |> group(columns: [\"sensor_id\"])\njoin(tables: {diagnostic: diagnostic, mode: mode}, on: [\"sensor_id\"]) |> filter(fn: (r) => r._value_mode == 1) |> map(fn: (r) => ({_time: r._time_diagnostic, _value: r._value_diagnostic, _field: r._field_diagnostic, sensor_id: r.sensor_id}))",
+          "refId": "A"
+        }
+      ],
+      "title": "CPU temperature",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "MHz"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 42
+      },
+      "id": 44,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "diagnostic = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_diagnostics\" and r.sensor_id == \"${sensor_id}\" and r._field == \"cpuFrequencyMhz\") |> last() |> group(columns: [\"sensor_id\"])\nmode = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"isDevMode\") |> last() |> group(columns: [\"sensor_id\"])\njoin(tables: {diagnostic: diagnostic, mode: mode}, on: [\"sensor_id\"]) |> filter(fn: (r) => r._value_mode == 1) |> map(fn: (r) => ({_time: r._time_diagnostic, _value: r._value_diagnostic, _field: r._field_diagnostic, sensor_id: r.sensor_id}))",
+          "refId": "A"
+        }
+      ],
+      "title": "CPU frequency",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "suffix: KiB"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 42
+      },
+      "id": 42,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "diagnostic = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_diagnostics\" and r.sensor_id == \"${sensor_id}\" and r._field == \"freeRam\") |> last() |> group(columns: [\"sensor_id\"])\nmode = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"isDevMode\") |> last() |> group(columns: [\"sensor_id\"])\njoin(tables: {diagnostic: diagnostic, mode: mode}, on: [\"sensor_id\"]) |> filter(fn: (r) => r._value_mode == 1) |> map(fn: (r) => ({_time: r._time_diagnostic, _value: r._value_diagnostic, _field: r._field_diagnostic, sensor_id: r.sensor_id}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Free memory",
+      "type": "stat",
+      "description": "Sensor free heap reported in KiB; shown only with recent Development telemetry."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      },
+      "id": 222,
+      "panels": [],
+      "title": "Radio",
+      "type": "row",
+      "targets": []
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 48
+      },
+      "id": 212,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.sensor_radio_present then (if exists r.sensor_radio_spreading_factor and exists r.sensor_radio_available and r.sensor_radio_available then float(v: r.sensor_radio_spreading_factor) else debug.null(type: \"float\")) else if exists r.radio_spreading_factor then float(v: r.radio_spreading_factor) else debug.null(type: \"float\")})) |> keep(columns: [\"_time\", \"_value\"])"
+        }
+      ],
+      "title": "Sensor radio SF (confirmed)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "rotkhz"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 48
+      },
+      "id": 223,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.sensor_radio_present then (if exists r.sensor_radio_bandwidth_khz and exists r.sensor_radio_available and r.sensor_radio_available then float(v: r.sensor_radio_bandwidth_khz) else debug.null(type: \"float\")) else if exists r.radio_bandwidth_khz then float(v: r.radio_bandwidth_khz) else debug.null(type: \"float\")})) |> keep(columns: [\"_time\", \"_value\"])"
+        }
+      ],
+      "title": "Sensor radio BW",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 48
+      },
+      "id": 224,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.sensor_radio_present then (if exists r.sensor_radio_coding_rate and exists r.sensor_radio_available and r.sensor_radio_available then float(v: r.sensor_radio_coding_rate) else debug.null(type: \"float\")) else if exists r.radio_coding_rate then float(v: r.radio_coding_rate) else debug.null(type: \"float\")})) |> map(fn: (r) => ({r with _value: if exists r._value then \"4/\" + string(v: int(v: r._value)) else debug.null(type: \"string\")})) |> keep(columns: [\"_time\", \"_value\"])"
+        }
+      ],
+      "title": "Sensor radio Code Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "dBm"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 18,
+        "y": 48
+      },
+      "id": 47,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.txPower then float(v: r.txPower) else debug.null(type: \"float\")}))"
+        }
+      ],
+      "title": "TX power",
+      "type": "stat",
+      "description": "Sensor-reported TX setting in dBm, available in both Operation and Development modes."
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "dBm"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 20,
+        "y": 48
+      },
+      "id": 45,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\ndiagnostic = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_diagnostics\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1)\nmode = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"isDevMode\") |> group(columns: [\"sensor_id\"]) |> last() |> keep(columns: [\"sensor_id\", \"_value\"]) |> rename(columns: {_value: \"mode\"})\njoin(tables: {diagnostic: diagnostic, mode: mode}, on: [\"sensor_id\"]) |> filter(fn: (r) => r.mode == 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.sensor_radio_present then (if exists r.sensor_radio_last_downlink_rssi_dbm then float(v: r.sensor_radio_last_downlink_rssi_dbm) else debug.null(type: \"float\")) else if exists r.lastRSSI and r.lastRSSI != 0 then float(v: r.lastRSSI) else debug.null(type: \"float\")}))"
+        }
+      ],
+      "title": "Sensor last RSSI",
+      "type": "stat",
+      "description": "Sensor's last accepted configuration downlink; Development telemetry only. Unavailable snapshot members remain empty."
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 22,
+        "y": 48
+      },
+      "id": 46,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 24
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\ndiagnostic = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_diagnostics\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1)\nmode = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"isDevMode\") |> group(columns: [\"sensor_id\"]) |> last() |> keep(columns: [\"sensor_id\", \"_value\"]) |> rename(columns: {_value: \"mode\"})\njoin(tables: {diagnostic: diagnostic, mode: mode}, on: [\"sensor_id\"]) |> filter(fn: (r) => r.mode == 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.sensor_radio_present then (if exists r.sensor_radio_last_downlink_snr_db then float(v: r.sensor_radio_last_downlink_snr_db) else debug.null(type: \"float\")) else if exists r.lastSNR and r.lastSNR != 0 then float(v: r.lastSNR) else debug.null(type: \"float\")}))"
+        }
+      ],
+      "title": "Sensor SNR",
+      "type": "stat",
+      "description": "Sensor's last accepted configuration downlink; Development telemetry only. Unavailable snapshot members remain empty."
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 53
+      },
+      "id": 210,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.gateway_radio_present then (if exists r.gateway_radio_spreading_factor and exists r.gateway_radio_available and r.gateway_radio_available then float(v: r.gateway_radio_spreading_factor) else debug.null(type: \"float\")) else if exists r.radio_spreading_factor then float(v: r.radio_spreading_factor) else debug.null(type: \"float\")})) |> keep(columns: [\"_time\", \"_value\"])"
+        }
+      ],
+      "title": "Gateway radio SF",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "rotkhz"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 53
+      },
+      "id": 226,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.gateway_radio_present then (if exists r.gateway_radio_bandwidth_khz and exists r.gateway_radio_available and r.gateway_radio_available then float(v: r.gateway_radio_bandwidth_khz) else debug.null(type: \"float\")) else if exists r.radio_bandwidth_khz then float(v: r.radio_bandwidth_khz) else debug.null(type: \"float\")})) |> keep(columns: [\"_time\", \"_value\"])"
+        }
+      ],
+      "title": "Gateway radio BW",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 53
+      },
+      "id": 225,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.gateway_radio_present then (if exists r.gateway_radio_coding_rate and exists r.gateway_radio_available and r.gateway_radio_available then float(v: r.gateway_radio_coding_rate) else debug.null(type: \"float\")) else if exists r.radio_coding_rate then float(v: r.radio_coding_rate) else debug.null(type: \"float\")})) |> map(fn: (r) => ({r with _value: if exists r._value then \"4/\" + string(v: int(v: r._value)) else debug.null(type: \"string\")})) |> keep(columns: [\"_time\", \"_value\"])"
+        }
+      ],
+      "title": "Gateway radio Code Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 53
+      },
+      "id": 213,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.sensor_radio_present then (if exists r.sensor_radio_uplink_rssi_dbm then float(v: r.sensor_radio_uplink_rssi_dbm) else debug.null(type: \"float\")) else if exists r.link_rssi_dbm then float(v: r.link_rssi_dbm) else debug.null(type: \"float\")}))"
+        }
+      ],
+      "title": "Link RSSI",
+      "type": "stat",
+      "description": "Gateway-observed Sensor uplink RSSI."
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "dBm"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Uplink SNR (dB)"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "unit",
+                "value": "dB"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Sensor TX power (dBm)"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "unit",
+                "value": "dBm"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Missing packets (detected)"
+              },
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Missing packets"
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "bars"
+              },
+              {
+                "id": "custom.barAlignment",
+                "value": -1
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 65
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 58
+      },
+      "id": 233,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "import \"internal/debug\"\nlink = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"])\nrssi = link |> map(fn: (r) => ({_time: r._time, _field: \"Uplink RSSI (dBm)\", _value: if exists r.sensor_radio_present then (if exists r.sensor_radio_uplink_rssi_dbm then float(v: r.sensor_radio_uplink_rssi_dbm) else debug.null(type: \"float\")) else if exists r.link_rssi_dbm then float(v: r.link_rssi_dbm) else debug.null(type: \"float\")}))\nsnr = link |> map(fn: (r) => ({_time: r._time, _field: \"Uplink SNR (dB)\", _value: if exists r.sensor_radio_present then (if exists r.sensor_radio_uplink_snr_db then float(v: r.sensor_radio_uplink_snr_db) else debug.null(type: \"float\")) else if exists r.link_snr_db then float(v: r.link_snr_db) else debug.null(type: \"float\")}))\npower = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"txPower\") |> map(fn: (r) => ({_time: r._time, _field: \"Sensor TX power (dBm)\", _value: float(v: r._value)}))\nunion(tables: [rssi, snr, power]) |> group(columns: [\"_field\"]) |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false) |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "refId": "B",
+          "query": "from(bucket: \"{{ influxdb_bucket }}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and (r._field == \"bootNonce\" or r._field == \"msgCount\"))\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => exists r.bootNonce and exists r.msgCount)\n  |> group(columns: [\"sensor_id\", \"bootNonce\"])\n  |> sort(columns: [\"_time\"])\n  |> difference(columns: [\"msgCount\"], nonNegative: true)\n  |> map(fn: (r) => ({r with _value: float(v: r.msgCount) - 1.0, _field: \"Missing packets (detected)\"}))\n  |> filter(fn: (r) => r._value > 0.0)\n  |> group(columns: [\"_start\", \"_stop\", \"_field\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: sum, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> sort(columns: [\"_time\"])"
+        }
+      ],
+      "title": "Reception Signal",
+      "type": "timeseries",
+      "description": "Gateway-observed Sensor uplink RSSI/SNR and Sensor TX setting, with red bars for missing packet counts detected in cloud readings. Query B compares msgCount within each bootNonce before summing gaps per display interval. Each bar is placed at the interval end containing receipt of the next packet; loss occurred earlier between observations. Zoom in for finer detection timing. Cloud gaps do not establish where in the LoRa/MQTT/ingestion path packets were lost."
+    },
+    {
+      "id": 214,
+      "type": "stat",
+      "title": "Sensor radio snapshot",
+      "description": "Freshness is enforced by the query; unavailable firmware snapshots remain empty.",
+      "gridPos": {
+        "x": 0,
+        "y": 70,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.sensor_radio_available then (if r.sensor_radio_available then 1.0 else 0.0) else debug.null(type: \"float\")}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Snapshot absent / stale",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Unavailable",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "Available",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 215,
+      "type": "stat",
+      "title": "Gateway radio TX power",
+      "description": "Gateway-local diagnostic only; the cloud does not control this value.",
+      "gridPos": {
+        "x": 8,
+        "y": 70,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "import \"internal/debug\"\nfrom(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, _value: if exists r.gateway_radio_tx_power_dbm and exists r.gateway_radio_available and r.gateway_radio_available then float(v: r.gateway_radio_tx_power_dbm) else debug.null(type: \"float\")}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Stale or unavailable"
+        }
+      }
+    },
+    {
+      "id": 216,
+      "type": "table",
+      "title": "Gateway duty diagnostics (not regulatory evidence)",
+      "gridPos": {
+        "x": 16,
+        "y": 70,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> keep(columns: [\"_time\", \"gateway_radio_present\", \"gateway_radio_available\", \"gateway_radio_duty_counted_burst_us\", \"gateway_radio_duty_cooldown_ms\", \"gateway_radio_duty_total_burst_count\", \"gateway_radio_duty_noncompliant_burst_count\", \"gateway_radio_duty_rule_percent\", \"gateway_radio_duty_noncompliant_burst_rate_percent\", \"gateway_radio_duty_drift_from_one_percent\", \"gateway_radio_duty_minimum_sleep_operation_s\", \"gateway_radio_duty_minimum_sleep_development_s\", \"gateway_radio_duty_null_fields\"])"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "description": "Latest cloud receipt and Gateway duty counters. Missing members remain unavailable; counter-derived rates do not measure RF airtime compliance.",
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unavailable"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 234,
+      "title": "Sensor radio details",
+      "type": "table",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 78,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unavailable"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "description": "Latest observation within five minutes. Cloud receipt time is authoritative; Gateway timestamp is untrusted metadata.",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> keep(columns: [\"_time\", \"online\", \"sensor_connection_uptime_s\", \"link_last_seen_seconds\", \"gateway_reported_at\", \"sensor_radio_present\", \"sensor_radio_available\", \"sensor_radio_frequency_mhz\", \"sensor_radio_bandwidth_khz\", \"sensor_radio_spreading_factor\", \"sensor_radio_coding_rate\", \"sensor_radio_tx_power_dbm\", \"sensor_radio_uplink_rssi_dbm\", \"sensor_radio_uplink_snr_db\", \"sensor_radio_last_downlink_rssi_dbm\", \"sensor_radio_last_downlink_snr_db\", \"sensor_radio_null_fields\"]) |> rename(columns: {_time: \"Cloud received at\", gateway_reported_at: \"Gateway timestamp (untrusted)\"})"
+        }
+      ]
+    },
+    {
+      "id": 235,
+      "title": "Gateway radio details",
+      "type": "table",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 78,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unavailable"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "description": "Latest observation within five minutes. Cloud receipt time is authoritative; Gateway timestamp is untrusted metadata.",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> keep(columns: [\"_time\", \"gateway_reported_at\", \"gateway_radio_present\", \"gateway_radio_available\", \"gateway_radio_frequency_mhz\", \"gateway_radio_bandwidth_khz\", \"gateway_radio_spreading_factor\", \"gateway_radio_coding_rate\", \"gateway_radio_tx_power_dbm\", \"gateway_radio_activity\", \"gateway_radio_rssi_dbm\", \"gateway_radio_snr_db\", \"gateway_radio_null_fields\"]) |> rename(columns: {_time: \"Cloud received at\", gateway_reported_at: \"Gateway timestamp (untrusted)\"})"
+        }
+      ]
+    },
+    {
+      "id": 236,
+      "title": "Sensor observation",
+      "type": "table",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 86,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unavailable"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "description": "Latest observation within five minutes. Cloud receipt time is authoritative; Gateway timestamp is untrusted metadata.",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\") |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"sensor_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> keep(columns: [\"_time\", \"gateway_reported_at\", \"bootNonce\", \"msgCount\", \"sleepInterval\", \"isDevMode\", \"needsTimeSync\", \"txPower\"]) |> rename(columns: {_time: \"Cloud received at\", gateway_reported_at: \"Gateway timestamp (untrusted)\"})"
+        }
+      ]
+    },
+    {
+      "id": 237,
+      "title": "Gateway connection and health",
+      "type": "table",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 86,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unavailable"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "description": "Latest observation within five minutes. Cloud receipt time is authoritative; Gateway timestamp is untrusted metadata.",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\") |> pivot(rowKey: [\"_time\", \"wifi_status\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> keep(columns: [\"_time\", \"gateway_reported_at\", \"uptime\", \"ip\", \"wifi_status\", \"wifi_rssi_dbm\", \"mqtt_connected\", \"mqtt_host\", \"mqtt_port\", \"sd_status\"]) |> rename(columns: {_time: \"Cloud received at\", gateway_reported_at: \"Gateway timestamp (untrusted)\"})"
+        }
+      ]
+    },
+    {
+      "id": 238,
+      "title": "LoRa packet drops",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 94,
+        "w": 24,
+        "h": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0 (no detected gaps)"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "description": "Number of missing msgCount values detected in the cloud for the selected Sensor and time range. Calculated separately per bootNonce; unchanged readings do not increment msgCount. This identifies a cloud-observed gap, not the exact point of LoRa loss.",
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and (r._field == \"bootNonce\" or r._field == \"msgCount\")) |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> filter(fn: (r) => exists r.bootNonce and exists r.msgCount) |> group(columns: [\"sensor_id\", \"bootNonce\"]) |> sort(columns: [\"_time\"]) |> difference(columns: [\"msgCount\"], nonNegative: true) |> map(fn: (r) => ({_time: r._time, _value: float(v: r.msgCount) - 1.0, _field: \"missing_packets\", sensor_id: r.sensor_id, bootNonce: r.bootNonce})) |> filter(fn: (r) => r._value > 0.0) |> group(columns: [\"sensor_id\"]) |> sum(column: \"_value\") |> map(fn: (r) => ({r with _value: int(v: r._value)})) |> keep(columns: [\"_value\"])"
+        }
+      ]
+    }
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 41,
+  "tags": [
+    "lorahome",
+    "technical"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "lorahome-influxdb"
+        },
+        "includeAll": false,
+        "label": "Sensor",
+        "name": "sensor_id",
+        "options": [],
+        "query": {
+          "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: \"{{ influxdb_bucket }}\", tag: \"sensor_id\", predicate: (r) => r._measurement == \"sensor_reading\", start: -30d)"
+        },
+        "refresh": 1,
+        "regex": "/^[0-9A-F]{2}(?::[0-9A-F]{2}){5}$/",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "lorahome-influxdb"
+        },
+        "includeAll": false,
+        "label": "Gateway",
+        "name": "gateway_id",
+        "options": [],
+        "query": {
+          "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: \"{{ influxdb_bucket }}\", tag: \"gateway_id\", predicate: (r) => r._measurement == \"gateway_status\", start: -30d)"
+        },
+        "refresh": 1,
+        "regex": "/^[0-9A-F]{2}(?::[0-9A-F]{2}){5}$/",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Configuration-prototype",
+  "uid": "lorahome-technical",
+  "version": 33
+}

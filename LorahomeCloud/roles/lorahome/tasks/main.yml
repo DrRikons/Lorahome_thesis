@@ -1,0 +1,421 @@
+---
+- name: Require an HTTPS alert receiver
+  ansible.builtin.assert:
+    that:
+      - alert_webhook_url is string
+      - (alert_webhook_url | urlsplit('scheme')) == 'https'
+      - (alert_webhook_url | urlsplit('hostname') | default('', true) | length) > 0
+      - (alert_webhook_url | urlsplit('hostname') | default('', true) | lower | trim('.') | regex_search('(^|[.])(invalid|example|test|localhost)$|(^|[.])example[.](com|net|org)$')) is none
+      - (alert_webhook_url | urlsplit('username')) is none
+      - (alert_webhook_url | urlsplit('password')) is none
+    fail_msg: Set alert_webhook_url to a real HTTPS notification receiver before deployment.
+  no_log: true
+
+- name: Validate LoRaHome deployment passwordsand certificate paths
+  ansible.builtin.assert:
+    that:
+      - influxdb_admin_token | length >= 32
+      - influxdb_admin_password | length >= 16
+      - grafana_admin_password | length >= 16
+      - mqtt_gateway_password | length >= 16
+      - mqtt_normalizer_password | length >= 16
+      - mqtt_control_api_password | length >= 16
+      - ([mqtt_gateway_user, mqtt_normalizer_user, mqtt_control_api_user] | unique | list | length) == 3
+      - control_api_token | length >= 32
+      - control_command_secret | length >= 32
+      - alert_low_battery_percent | int >= 0
+      - alert_low_battery_percent | int <= 100
+      - alert_malformed_messages_5m | int > 0
+      - influxdb_event_bucket != influxdb_bucket
+      - mqtt_tls_cert_host_path | length > 0
+      - mqtt_tls_key_host_path | length > 0
+      - lorahome_network != mqtt_public_network
+      - mqtt_port | int != 1883
+      - mqtt_private_bind_host != mqtt_public_bind_host
+      - mqtt_private_bind_host is match('^[a-zA-Z0-9][a-zA-Z0-9-]{0,62}$')
+      - mqtt_public_bind_host is match('^[a-zA-Z0-9][a-zA-Z0-9-]{0,62}$')
+    fail_msg: >-
+      Supply passwords and tokens through Vault or host-only variables; check
+      their lengths, certificate paths, distinct MQTT networks/ports,
+      and distinct valid MQTT listener DNS aliases.
+  no_log: true
+
+- name: Check if certificate files exist on the host
+  ansible.builtin.stat:
+    path: '{{ item }}'
+    follow: true
+  loop:
+    - '{{ mqtt_tls_cert_host_path }}'
+    - '{{ mqtt_tls_key_host_path }}'
+  register: mqtt_tls_files
+
+- name: Determine whether the certificate needs issuance
+  ansible.builtin.set_fact:
+    mqtt_tls_bootstrap_needed: "{{ mqtt_tls_files.results | selectattr('stat.exists', 'equalto', false) | list | length > 0 }}"
+
+- name: Require pre-provisioned certificates for custom MQTT endpoints
+  ansible.builtin.assert:
+    that:
+      - mqtt_host == grafana_host
+      - mqtt_tls_cert_host_path == container_data_path ~ '/nginx/certs/' ~ grafana_host ~ '.crt'
+      - mqtt_tls_key_host_path == container_data_path ~ '/nginx/certs/' ~ grafana_host ~ '.key'
+    fail_msg: >-
+      Automatic issuance supports the shared Grafana hostname and default ACME
+      paths only. Provision both custom MQTT certificate files before deployment.
+  when: mqtt_tls_bootstrap_needed
+
+- name: Create the LoRaHome project directory
+  ansible.builtin.file:
+    path: '{{ container_data_path }}/{{ app_dir }}'
+    state: directory
+    owner: '{{ ansible_user }}'
+    group: wheel
+    mode: '0755'
+
+- name: Render Docker Compose file on Host
+  ansible.builtin.template:
+    src: compose.j2
+    dest: '{{ container_data_path }}/{{ app_dir }}/compose.yaml'
+    owner: '{{ ansible_user }}'
+    group: wheel
+    mode: '0640'
+
+- name: Validate the rendered Compose file
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --project-directory
+      - '{{ container_data_path }}/{{ app_dir }}'
+      - config
+      - --quiet
+  changed_when: false    
+
+- name: Create Mosquitto persistent directory
+  ansible.builtin.file:
+    path: '{{ container_data_path }}/{{ app_dir }}/mosquitto'
+    state: directory
+    owner: '1883'
+    group: '1883'
+    mode: '2750'
+
+- name: Create Mosquitto persistent subdirectories
+  ansible.builtin.file:
+    path: '{{ container_data_path }}/{{ app_dir }}/mosquitto/{{ item }}'
+    state: directory
+    owner: '1883'
+    group: '1883'
+    mode: '2750'
+  loop:
+    - config
+    - certs
+    - data
+    - log
+
+- name: Create Mosquitto password-file
+  ansible.builtin.copy:
+    content: ''
+    force: false
+    dest: '{{ container_data_path }}/{{ app_dir }}/mosquitto/config/pwfile'
+    owner: '1883'
+    group: '1883'
+    mode: '0640'
+
+- name: Createconfigured MQTT users
+  ansible.builtin.lineinfile:
+    path: '{{ container_data_path }}/{{ app_dir }}/mosquitto/config/pwfile'
+    regexp: '^{{ item.username | regex_escape }}:'
+    line: '{{ item.username }}:{{ item.password | mosquitto_pbkdf2 }}'
+  loop:
+    - { username: '{{ mqtt_gateway_user }}', password: '{{ mqtt_gateway_password }}' }
+    - { username: '{{ mqtt_normalizer_user }}', password: '{{ mqtt_normalizer_password }}' }
+    - { username: '{{ mqtt_control_api_user }}', password: '{{ mqtt_control_api_password }}' }
+  no_log: true
+
+- name: Render Mosquitto configuration on host
+  ansible.builtin.template:
+    src: mosquitto.conf.j2
+    dest: '{{ container_data_path }}/{{ app_dir }}/mosquitto/config/mosquitto.conf'
+    owner: '1883'
+    group: '1883'
+    mode: '0640'
+
+- name: Render Mosquitto access control list on host
+  ansible.builtin.template:
+    src: aclfile.j2
+    dest: '{{ container_data_path }}/{{ app_dir }}/mosquitto/config/aclfile'
+    owner: '1883'
+    group: '1883'
+    mode: '0640'    
+
+- name: Create InfluxDB persistent directory
+  ansible.builtin.file:
+    path: '{{ container_data_path }}/{{ app_dir }}/influxdb'
+    state: directory
+    owner: '1000'
+    group: wheel
+    mode: '2750'
+
+- name: Create normalizer build directory
+  ansible.builtin.file:
+    path: '{{ container_data_path }}/{{ app_dir }}/normalizer'
+    state: directory
+    owner: '{{ ansible_user }}'
+    group: wheel
+    mode: '0750'
+
+- name: Render MQTT normalizer files on host
+  ansible.builtin.copy:
+    src: 'normalizer/{{ item }}'
+    dest: '{{ container_data_path }}/{{ app_dir }}/normalizer/{{ item }}'
+    owner: '{{ ansible_user }}'
+    group: wheel
+    mode: '0640'
+  loop:
+    - Dockerfile
+    - requirements.txt
+    - app.py
+  register: normalizer_sources
+
+- name: Create control API persistent directory
+  ansible.builtin.file:
+    path: '{{ container_data_path }}/{{ app_dir }}/control-api'
+    state: directory
+    owner: '65532'
+    group: wheel
+    mode: '2750'
+
+- name: Render control API files on host
+  ansible.builtin.copy:
+    src: 'control-api/{{ item }}'
+    dest: '{{ container_data_path }}/{{ app_dir }}/control-api/{{ item }}'
+    owner: '{{ ansible_user }}'
+    group: wheel
+    mode: '0640'
+  loop:
+    - Dockerfile
+    - requirements.txt
+    - app.py
+  register: control_api_sources
+
+  
+- name: Create Grafana persistent directories
+  ansible.builtin.file:
+    path: '{{ container_data_path }}/{{ app_dir }}/grafana/{{ item }}'
+    state: directory
+    owner: '472'
+    group: wheel
+    mode: '2750'
+  loop:
+    - ''
+    - provisioning
+    - provisioning/datasources
+    - provisioning/dashboards
+    - provisioning/alerting
+    - dashboards
+
+- name: Provision Grafana's InfluxDB datasource
+  ansible.builtin.template:
+    src: influxdb-datasource.yml.j2
+    dest: '{{ container_data_path }}/{{ app_dir }}/grafana/provisioning/datasources/influxdb.yml'
+    owner: '472'
+    group: '472'
+    mode: '0640'
+
+- name: Provision Grafana dashboard provider
+  ansible.builtin.copy:
+    content: |
+      apiVersion: 1
+      providers:
+        - name: LoRaHome
+          folder: LoRaHome
+          type: file
+          options:
+            path: /var/lib/grafana/dashboards
+    dest: '{{ container_data_path }}/{{ app_dir }}/grafana/provisioning/dashboards/lorahome.yml'
+    owner: '472'
+    group: '472'
+    mode: '0640'
+
+- name: Provision LoRaHome overview dashboard
+  ansible.builtin.template:
+    src: lorahome-overview.json.j2
+    dest: '{{ container_data_path }}/{{ app_dir }}/grafana/dashboards/lorahome-overview.json'
+    owner: '472'
+    group: '472'
+    mode: '0640'
+
+- name: Provision LoRaHome home automation dashboard
+  ansible.builtin.template:
+    src: lorahome-home.json.j2
+    dest: '{{ container_data_path }}/{{ app_dir }}/grafana/dashboards/lorahome-home.json'
+    owner: '472'
+    group: '472'
+    mode: '0600'
+  no_log: true
+
+- name: Provision LoRaHome relay feedback dashboard
+  ansible.builtin.template:
+    src: lorahome-relay.json.j2
+    dest: '{{ container_data_path }}/{{ app_dir }}/grafana/dashboards/lorahome-relay.json'
+    owner: '472'
+    group: '472'
+    mode: '0640'
+
+- name: Provision LoRaHome technical dashboard
+  ansible.builtin.template:
+    src: lorahome-technical.json.j2
+    dest: '{{ container_data_path }}/{{ app_dir }}/grafana/dashboards/lorahome-technical.json'
+    owner: '472'
+    group: '472'
+    mode: '0600'
+  no_log: true
+
+- name: Provision LoRaHome alert rules and contact point
+  ansible.builtin.template:
+    src: lorahome-alerts.yml.j2
+    dest: '{{ container_data_path }}/{{ app_dir }}/grafana/provisioning/alerting/lorahome.yml'
+    owner: '472'
+    group: '472'
+    mode: '0600'
+  register: grafana_alerts
+  no_log: true
+
+- name: Start Grafana service (Initiate certificate issuance)
+  community.docker.docker_compose_v2:
+    project_src: '{{ container_data_path }}/{{ app_dir }}'
+    services:
+      - grafana
+  when: mqtt_tls_bootstrap_needed
+
+- name: Wait for Certificate Deployment
+  ansible.builtin.wait_for:
+    path: '{{ item }}'
+    state: present
+    timeout: 300
+    msg: 'ACME certificate not deployed at {{ item }}. Check nginx-proxy/acme-companion logs, DNS, port 80, and the host certificate volume.'
+  loop:
+    - '{{ mqtt_tls_cert_host_path }}'
+    - '{{ mqtt_tls_key_host_path }}'
+  when: mqtt_tls_bootstrap_needed
+
+- name: Validate Certificate Files After Bootstrap
+  ansible.builtin.stat:
+    path: '{{ item }}'
+    follow: true
+  loop:
+    - '{{ mqtt_tls_cert_host_path }}'
+    - '{{ mqtt_tls_key_host_path }}'
+  register: mqtt_tls_files_after_bootstrap
+
+- name: Require Certificate Files
+  ansible.builtin.assert:
+    that: item.stat.exists and item.stat.isreg and item.stat.size > 0
+    fail_msg: 'MQTT TLS certificate or key file is missing: {{ item.item }}'
+  loop: '{{ mqtt_tls_files_after_bootstrap.results }}'
+
+##Lets encrypt produces files owned by root, copy them to Mosquitto dir with correct ownership
+- name: Copy certificates to Mosquitto dir
+  ansible.builtin.copy:
+    src: '{{ item.src }}'
+    dest: '{{ container_data_path }}/{{ app_dir }}/mosquitto/certs/{{ item.dest }}'
+    remote_src: true
+    owner: '1883'
+    group: '1883'
+    mode: '{{ item.mode }}'
+  loop:
+    - { src: '{{ mqtt_tls_cert_host_path }}', dest: cert.pem, mode: '0644' }
+    - { src: '{{ mqtt_tls_key_host_path }}', dest: key.pem, mode: '0640' }
+
+- name: Check certificate ownership 
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - --user
+      - '1883:1883'
+      - --entrypoint
+      - sh
+      - --mount
+      - 'type=bind,src={{ container_data_path }}/{{ app_dir }}/mosquitto/certs/cert.pem,dst=/cert.pem,readonly'
+      - --mount
+      - 'type=bind,src={{ container_data_path }}/{{ app_dir }}/mosquitto/certs/key.pem,dst=/key.pem,readonly'
+      - eclipse-mosquitto:2.0
+      - -ec
+      - 'test -r /cert.pem && test -r /key.pem'
+  changed_when: false
+
+- name: Create certificate copy cron job
+  ansible.builtin.cron:
+    name: Refresh LoRaHome Mosquitto TLS certificates
+    user: root
+    minute: '0'
+    hour: '0'
+    day: '1,11,21,31'
+    job: >-
+      changed=0; if [ -r {{ mqtt_tls_cert_host_path | quote }} ] && ! cmp -s {{ mqtt_tls_cert_host_path | quote }} {{ (container_data_path ~ '/' ~ app_dir ~ '/mosquitto/certs/cert.pem') | quote }}; then install -o 1883 -g 1883 -m 0644 {{ mqtt_tls_cert_host_path | quote }} {{ (container_data_path ~ '/' ~ app_dir ~ '/mosquitto/certs/cert.pem') | quote }} && changed=1; fi; if [ -r {{ mqtt_tls_key_host_path | quote }} ] && ! cmp -s {{ mqtt_tls_key_host_path | quote }} {{ (container_data_path ~ '/' ~ app_dir ~ '/mosquitto/certs/key.pem') | quote }}; then install -o 1883 -g 1883 -m 0640 {{ mqtt_tls_key_host_path | quote }} {{ (container_data_path ~ '/' ~ app_dir ~ '/mosquitto/certs/key.pem') | quote }} && changed=1; fi; [ "$changed" -eq 0 ] || docker restart lorahome-mosquitto >/dev/null
+  no_log: true
+
+- name: Start InFluxDB service
+  community.docker.docker_compose_v2:
+    project_src: '{{ container_data_path }}/{{ app_dir }}'
+    services:
+      - influxdb
+    wait: true
+    wait_timeout: 180
+
+- name: Check short-retention ingestion event bucket
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - lorahome-influxdb
+      - sh
+      - -c
+      - 'INFLUX_TOKEN="$DOCKER_INFLUXDB_INIT_ADMIN_TOKEN" exec influx bucket list --org "$1" --json'
+      - influx
+      - '{{ influxdb_org }}'
+  register: influxdb_event_bucket_list
+  changed_when: false
+
+- name: Create seven-day ingestion event bucket
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - lorahome-influxdb
+      - sh
+      - -c
+      - 'INFLUX_TOKEN="$DOCKER_INFLUXDB_INIT_ADMIN_TOKEN" exec influx bucket create --name "$1" --org "$2" --retention 7d'
+      - influx
+      - '{{ influxdb_event_bucket }}'
+      - '{{ influxdb_org }}'
+  when: influxdb_event_bucket_list.stdout | from_json | selectattr('name', 'equalto', influxdb_event_bucket) | list | length == 0
+
+- name: Start Mosquitto service
+  community.docker.docker_compose_v2:
+    project_src: '{{ container_data_path }}/{{ app_dir }}'
+    services:
+      - mosquitto
+    # The broker gets recreated to load new passwords, listener settings and certificate mounts.
+    recreate: always
+    wait: true
+    wait_timeout: 180
+
+- name: Run Compose to start the rest of the services
+  community.docker.docker_compose_v2:
+    project_src: '{{ container_data_path }}/{{ app_dir }}'
+    build: "{{ (normalizer_sources.changed or control_api_sources.changed) | ternary('always', 'policy') }}"
+    wait: true
+    wait_timeout: 180
+
+- name: Restart Grafana to load changed alert provisioning
+  community.docker.docker_compose_v2:
+    project_src: '{{ container_data_path }}/{{ app_dir }}'
+    services:
+      - grafana
+    recreate: always
+    wait: true
+    wait_timeout: 180
+  when: grafana_alerts.changed

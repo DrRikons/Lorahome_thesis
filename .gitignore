@@ -66,3 +66,11 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+#platformio/IDEs
+.pio
+.vscode
+.platformio/
+
+#Secrets/sensitive config
+*secrets.h

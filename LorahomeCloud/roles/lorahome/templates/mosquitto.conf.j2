@@ -1,0 +1,16 @@
+persistence true
+persistence_location /mosquitto/data/
+log_dest stdout
+allow_anonymous false
+password_file /mosquitto/config/pwfile
+acl_file /mosquitto/config/aclfile
+listener {{ mqtt_port }} {{ mqtt_public_bind_host }}
+protocol mqtt
+certfile /mosquitto/certs/cert.pem
+keyfile /mosquitto/certs/key.pem
+tls_version tlsv1.2
+listener 1883 {{ mqtt_private_bind_host }}
+protocol mqtt
+max_packet_size 2048
+message_size_limit 2048
+connection_messages true

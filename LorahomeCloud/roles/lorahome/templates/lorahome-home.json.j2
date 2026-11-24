@@ -1,0 +1,1295 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 80,
+          "min": 16,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue"
+              },
+              {
+                "color": "#EAB839",
+                "value": 38
+              },
+              {
+                "color": "red",
+                "value": 55
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 0
+      },
+      "id": 101,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"temperature_c\") |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Boiler temperature",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
+      "id": 102,
+      "options": {
+        "baidu": {
+          "callback": "bmapReady",
+          "key": ""
+        },
+        "editor": {
+          "format": "auto"
+        },
+        "editorMode": "code",
+        "gaode": {
+          "key": "",
+          "plugin": "AMap.Scale,AMap.ToolBar"
+        },
+        "getOption": "const value=(i)=>{const s=context.panel.data.series[i];const f=s?.fields.find(x=>x.type==='number');return f?.values?.get?.(f.values.length-1)??f?.values?.[f.values.length-1]};\nconst pct=value(0),volts=value(1);if(!Number.isFinite(pct)||!Number.isFinite(volts))return {title:{text:'Battery unavailable',left:'center',top:'middle'}};\nconst color=pct<20?'#e5484d':pct<40?'#e5a93d':'#4bc57b';return {graphic:[{type:'rect',shape:{x:30,y:32,width:210,height:100,r:12},style:{stroke:'#9aa7b4',fill:'transparent',lineWidth:4}},{type:'rect',shape:{x:240,y:63,width:16,height:38,r:3},style:{fill:'#9aa7b4'}},{type:'rect',shape:{x:38,y:40,width:Math.max(0,Math.min(194,pct*1.94)),height:84,r:7},style:{fill:color}},{type:'text',style:{x:135,y:82,text:`${Math.round(pct)}%`,fill:'#ffffff',font:'bold 30px sans-serif',textAlign:'center',textVerticalAlign:'middle'}},{type:'text',style:{x:135,y:155,text:`${volts.toFixed(2)} V`,fill:'#cbd5e1',font:'22px sans-serif',textAlign:'center'}}]};",
+        "google": {
+          "callback": "gmapReady",
+          "key": ""
+        },
+        "map": "none",
+        "renderer": "svg",
+        "themeEditor": {
+          "config": "{}",
+          "name": "default"
+        },
+        "visualEditor": {
+          "code": "return {\n  dataset: context.editor.dataset,\n  series: context.editor.series,\n  xAxis: {\n    type: 'time',\n  },\n  yAxis: {\n    type: 'value',\n    min: 'dataMin',\n  },\n}\n",
+          "dataset": [],
+          "series": []
+        }
+      },
+      "pluginVersion": "6.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"battPercent\") |> last()",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_reading\" and r.sensor_id == \"${sensor_id}\" and r._field == \"battery_voltage_v\") |> last()",
+          "refId": "B"
+        }
+      ],
+      "title": "Sensor battery",
+      "type": "volkovlabs-echarts-panel"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "1": {
+                  "color": "green",
+                  "text": "Online"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "Offline / stale",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "id": 103,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"uptime\") |> group(columns: [\"gateway_id\"]) |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({r with _value: 1}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Gateway online",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "Offline"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "Online"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "Offline / stale",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 4
+      },
+      "id": 104,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "sensor = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"sensor_status\" and r.sensor_id == \"${sensor_id}\" and r._field == \"online\") |> last() |> map(fn: (r) => ({r with join_key: \"status\"})) |> group(columns: [\"join_key\"])\ngateway = from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"uptime\") |> group() |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({r with join_key: \"status\"})) |> group(columns: [\"join_key\"])\njoin(tables: {sensor: sensor, gateway: gateway}, on: [\"join_key\"]) |> map(fn: (r) => ({_time: r._time_sensor, _value: if r._value_sensor then 1 else 0})) |> group(columns: [])",
+          "refId": "A"
+        }
+      ],
+      "title": "Sensor online",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 105,
+      "options": {
+        "buttonGroup": {
+          "orientation": "right",
+          "size": "md"
+        },
+        "confirmModal": {
+          "body": "Send the selected relay command to the Gateway? If the previous attempt failed, inspect contact feedback before retrying. Contact does not prove boiler heat or mains power.",
+          "cancel": "Cancel",
+          "columns": {
+            "include": [
+              "name",
+              "oldValue",
+              "newValue"
+            ],
+            "name": "Label",
+            "newValue": "New Value",
+            "oldValue": "Old Value"
+          },
+          "confirm": "Confirm",
+          "elementDisplayMode": "modified",
+          "title": "Confirm device changes"
+        },
+        "elementValueChanged": "if (context.element?.id !== 'recoveryAcknowledgement') return;\nconst selected = context.element.value;\nif (!Array.isArray(selected) || !selected.includes('acknowledge')) return;\nif (!window.confirm('Clear the pending command after inspecting Gateway feedback? This does not confirm or resend the command.')) {\n  context.panel.patchFormValue({recoveryAcknowledgement: []}); return;\n}\nconst gateway = context.grafana.templateService.replace('${gateway_id}');\nlocalStorage.removeItem('lorahome-relay-command:' + gateway);\ncontext.panel.patchFormValue({recoveryAcknowledgement: []});\ncontext.panel.initialRequest();",
+        "elements": [
+          {
+            "allowCustomValue": false,
+            "disableIf": "const status = context.panel.elements.find(e => e.id === \"relayPending\")?.value;\r\nreturn ![\"No command pending\", \"Confirmed by measured contact\", \"Relay failed; inspect feedback before retry\"].includes(status);",
+            "id": "relayClosed",
+            "labelWidth": 20,
+            "options": [
+              {
+                "id": "ON",
+                "label": "ON",
+                "value": "ON"
+              },
+              {
+                "id": "OFF",
+                "label": "OFF",
+                "value": "OFF"
+              }
+            ],
+            "optionsSource": "Custom",
+            "queryField": {
+              "label": "relayClosed",
+              "refId": "B",
+              "value": "relayClosed"
+            },
+            "section": "",
+            "title": "Boiler",
+            "tooltip": "A failed relay can be retried manually after inspecting fresh contact feedback.",
+            "type": "radio",
+            "uid": "81284893-8a12-4f51-8796-6f0eababad6a",
+            "unit": "",
+            "value": ""
+          },
+          {
+            "id": "relayPending",
+            "labelWidth": 20,
+            "section": "",
+            "title": "Command status",
+            "tooltip": "Command result is checked before confirming the measured contact.",
+            "type": "disabled",
+            "uid": "relay-command-status",
+            "value": "No command pending"
+          },
+          {
+            "id": "recoveryAcknowledgement",
+            "uid": "relay-recovery-105",
+            "title": "Recovery",
+            "type": "checkboxList",
+            "labelWidth": 20,
+            "section": "",
+            "optionsSource": "Custom",
+            "options": [
+              {
+                "label": "Acknowledge uncertainty after inspecting Gateway feedback",
+                "value": "acknowledge",
+                "type": "string"
+              }
+            ],
+            "value": []
+          }
+        ],
+        "initial": {
+          "code": "const gateway=context.grafana.templateService.replace('${gateway_id}');const key='lorahome-relay-command:'+gateway;const raw=localStorage.getItem(key);\nconst frame=context.panel.data.series.find(s=>s.refId==='B');const field=frame?.fields.find(f=>f.name==='relayClosed');const observed=field?.values?.get?.(field.values.length-1)??field?.values?.[field.values.length-1];const failure=frame?.fields.find(f=>f.name==='relayFailed');const failed=failure?.values?.get?.(failure.values.length-1)??failure?.values?.[failure.values.length-1];const time=frame?.fields.find(f=>f.type==='time');const observedAt=time?.values?.get?.(time.values.length-1)??time?.values?.[time.values.length-1];\nif(!raw){if(!['ON','OFF'].includes(observed)){context.panel.patchFormValue({relayClosed:'',relayPending:'Feedback unavailable or inconsistent'});context.panel.disableSubmit();}else {context.panel.patchFormValue({relayClosed:observed,relayPending:failed===true?'Relay failed; inspect feedback before retry':'No command pending'});context.panel.enableSubmit?.();}return;}\nlet pending;try{pending=JSON.parse(raw)}catch{localStorage.removeItem(key);return;}\n\nconst base=context.grafana.templateService.replace(context.panel.options.update.url);const auth=context.panel.options.update.header.find(h=>h.name==='Authorization')?.value;\nreturn fetch(base+'/commands/'+encodeURIComponent(pending.id),{headers:{Authorization:auth},cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject(Error('Command status unavailable'))).then(result=>{\nif(result.status==='applied'&&observed===pending.target&&Number(observedAt)>Date.parse(result.createdAt)){localStorage.removeItem(key);context.panel.patchFormValue({relayClosed:observed,relayPending:'Confirmed by measured contact'});context.panel.enableSubmit?.();return;}\nif(['failed','rejected','superseded'].includes(result.status)){localStorage.removeItem(key);context.panel.patchFormValue({relayPending:'Command '+result.status});context.panel.disableSubmit();return;}\ncontext.panel.patchFormValue({relayClosed:'',relayPending:result.status==='applied'?'Awaiting fresh measured contact':Date.now()-Date.parse(result.createdAt)>300000?'Confirmation unavailable; inspect measured contact':'Pending: '+result.status});context.panel.disableSubmit();\n}).catch(()=>{context.panel.patchFormValue({relayClosed:'',relayPending:'Command status unavailable; awaiting contact'});context.panel.disableSubmit();});",
+          "contentType": "application/json",
+          "datasource": "",
+          "getPayload": "return {}",
+          "highlight": false,
+          "highlightColor": "green",
+          "method": "query",
+          "payload": {}
+        },
+        "layout": {
+          "orientation": "vertical",
+          "padding": 10,
+          "sectionVariant": "default",
+          "sections": [],
+          "variant": "single"
+        },
+        "reset": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "process",
+          "text": "Reset",
+          "variant": "hidden"
+        },
+        "resetAction": {
+          "code": "",
+          "confirm": false,
+          "getPayload": "return {}",
+          "mode": "initial",
+          "payload": {}
+        },
+        "saveDefault": {
+          "icon": "save",
+          "text": "Save Default",
+          "variant": "hidden"
+        },
+        "submit": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "cloud-upload",
+          "text": "Set boiler ON / OFF",
+          "variant": "primary"
+        },
+        "sync": true,
+        "update": {
+          "code": "const response = context.panel.response; if (!response) { context.grafana.notifyError(['Boiler relay', 'Request failed']); return; }\nconst target = context.panel.elements.find(e => e.id === 'relayClosed')?.value;\nreturn response.clone().json().then(body => {\n  if (!response.ok) { context.grafana.notifyError(['Boiler relay', JSON.stringify(body)]); return; }\n  const gateway = context.grafana.templateService.replace('${gateway_id}'); localStorage.setItem('lorahome-relay-command:' + gateway, JSON.stringify({ id: body.commandId, target, issuedAt: Date.now() }));\n  context.panel.disableSubmit(); context.panel.patchFormValue({ relayClosed: '', relayPending: 'Pending: published' }); context.grafana.notifyWarning(['Boiler relay', 'Command sent; awaiting contact feedback. ID: ' + body.commandId]);\n}).catch(() => context.grafana.notifyError(['Boiler relay', 'Invalid response']));",
+          "confirm": false,
+          "contentType": "application/json",
+          "getPayload": "const state = context.panel.elements.find(e => e.id === 'relayPending')?.value; if (!['No command pending', 'Confirmed by measured contact', 'Relay failed; inspect feedback before retry'].includes(state)) throw Error('Relay confirmation pending or unavailable'); const confirmed = context.panel.initial?.relayClosed; if (!['ON', 'OFF'].includes(confirmed)) throw Error('Relay feedback is unavailable or pending'); const value = context.panel.elements.find(e => e.id === 'relayClosed')?.value; if (value !== 'ON' && value !== 'OFF') throw Error('Choose ON or OFF'); return { relayClosed: value === 'ON' };",
+          "header": [
+            {
+              "name": "Authorization",
+              "value": {{ ("Bearer " ~ control_api_token) | to_json }}
+            }
+          ],
+          "method": "POST",
+          "payload": {},
+          "payloadMode": "custom",
+          "url": "https://{{ control_api_host }}/api/v1/gateways/${gateway_id}/relay"
+        },
+        "updateEnabled": "auto"
+      },
+      "pluginVersion": "5.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_relay_status\" and r.gateway_id == \"${gateway_id}\" and (r._field == \"feedbackClosed\" or r._field == \"requestedClosed\" or r._field == \"failed\" or r._field == \"durable\")) |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({_time: r._time, relayClosed: if exists r.feedbackClosed and exists r.requestedClosed and exists r.failed and exists r.durable and r.durable == true and (r.failed == true or r.feedbackClosed == r.requestedClosed) then (if r.feedbackClosed then \"ON\" else \"OFF\") else \"\", relayFailed: r.failed}))",
+          "refId": "B"
+        }
+      ],
+      "title": "Boiler ON / OFF",
+      "transparent": true,
+      "type": "volkovlabs-form-panel"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 106,
+      "options": {
+        "buttonGroup": {
+          "orientation": "right",
+          "size": "md"
+        },
+        "confirmModal": {
+          "body": "Save the Gateway maximum ON time? This setting applies on the next ON command; it does not change an active ON period.",
+          "cancel": "Cancel",
+          "columns": {
+            "include": [
+              "name",
+              "oldValue",
+              "newValue"
+            ],
+            "name": "Label",
+            "newValue": "New Value",
+            "oldValue": "Old Value"
+          },
+          "confirm": "Confirm",
+          "elementDisplayMode": "modified",
+          "title": "Confirm device changes"
+        },
+        "elementValueChanged": "if (context.element?.id !== 'recoveryAcknowledgement') return;\nconst selected = context.element.value;\nif (!Array.isArray(selected) || !selected.includes('acknowledge')) return;\nif (!window.confirm('Clear the pending command after inspecting Gateway feedback? This does not confirm or resend the command.')) {\n  context.panel.patchFormValue({recoveryAcknowledgement: []}); return;\n}\nconst gateway = context.grafana.templateService.replace('${gateway_id}');\nlocalStorage.removeItem('lorahome-timeout-command:' + gateway);\ncontext.panel.patchFormValue({recoveryAcknowledgement: []});\ncontext.panel.initialRequest();",
+        "elements": [
+          {
+            "id": "relayMaxOnSeconds",
+            "labelWidth": 20,
+            "max": 7200,
+            "min": 1,
+            "queryField": {
+              "label": "relayMaxOnSeconds",
+              "refId": "B",
+              "value": "maxOnSeconds"
+            },
+            "section": "",
+            "showIf": "",
+            "title": "Timeout (s)",
+            "tooltip": "A changed timeout applies on the next ON command, not the current ON period.",
+            "type": "number",
+            "uid": "d21ab6b2-b730-42e5-8c0c-7bc5f11ccf80",
+            "unit": "",
+            "value": ""
+          },
+          {
+            "id": "timeoutStatus",
+            "labelWidth": 20,
+            "section": "",
+            "title": "Status",
+            "tooltip": "Requires fresh Gateway relay status.",
+            "type": "disabled",
+            "uid": "failsafe-status",
+            "value": "Unavailable"
+          },
+          {
+            "id": "recoveryAcknowledgement",
+            "uid": "relay-recovery-106",
+            "title": "Recovery",
+            "type": "checkboxList",
+            "labelWidth": 20,
+            "section": "",
+            "optionsSource": "Custom",
+            "options": [
+              {
+                "label": "Acknowledge uncertainty after inspecting Gateway feedback",
+                "value": "acknowledge",
+                "type": "string"
+              }
+            ],
+            "value": []
+          }
+        ],
+        "initial": {
+          "code": "const gateway = context.grafana.templateService.replace('${gateway_id}');\r\nconst key = 'lorahome-timeout-command:' + gateway;\r\nconst frame = context.panel.data.series.find(s => s.refId === 'B');\r\nconst field = frame?.fields.find(f => f.name === 'maxOnSeconds');\r\nconst time = frame?.fields.find(f => f.type === 'time');\r\nconst value = field?.values?.get?.(field.values.length - 1)\r\n  ?? field?.values?.[field.values.length - 1];\r\nconst observedAt = time?.values?.get?.(time.values.length - 1)\r\n  ?? time?.values?.[time.values.length - 1];\r\n\r\nconst valid = Number.isInteger(value) && value >= 1 && value <= 7200;\r\nconst raw = localStorage.getItem(key);\r\n\r\nif (!raw) {\r\n  context.panel.patchFormValue({\r\n    timeoutStatus: valid ? 'Setting saved; applies on next ON' : 'Gateway status unavailable'\r\n  });\r\n  if (valid) context.panel.enableSubmit();\r\n  else context.panel.disableSubmit();\r\n  return;\r\n}\r\n\r\ncontext.panel.disableSubmit();\r\n\r\nlet pending;\r\ntry {\r\n  pending = JSON.parse(raw);\r\n} catch {\r\n  context.panel.patchFormValue({\r\n    timeoutStatus: 'Invalid pending command; inspect Gateway setting'\r\n  });\r\n  return;\r\n}\r\n\r\nconst base = context.grafana.templateService.replace(context.panel.options.update.url);\r\nconst auth = context.panel.options.update.header.find(h => h.name === 'Authorization')?.value;\r\n\r\nreturn fetch(base + '/commands/' + encodeURIComponent(pending.id), {\r\n  headers: { Authorization: auth },\r\n  cache: 'no-store'\r\n})\r\n  .then(r => r.ok ? r.json() : Promise.reject(Error('Command status unavailable')))\r\n  .then(result => {\r\n    if (['failed', 'rejected', 'superseded'].includes(result.status)) {\r\n      localStorage.removeItem(key);\r\n      context.panel.patchFormValue({ timeoutStatus: 'Command ' + result.status });\r\n      return;\r\n    }\r\n\r\n    if (\r\n      result.status === 'applied' &&\r\n      valid &&\r\n      value === pending.target &&\r\n      Number(observedAt) > Date.parse(result.createdAt)\r\n    ) {\r\n      localStorage.removeItem(key);\r\n      context.panel.patchFormValue({ timeoutStatus: 'Setting saved; applies on next ON' });\r\n      context.panel.enableSubmit();\r\n      context.grafana.notifySuccess([\r\n        'Failsafe timeout',\r\n        'Gateway saved the timeout; it applies on the next ON command'\r\n      ]);\r\n      return;\r\n    }\r\n\r\n    context.panel.patchFormValue({\r\n      timeoutStatus: result.status === 'applied'\r\n        ? 'Awaiting fresh Gateway setting'\r\n        : Date.now() - Date.parse(result.createdAt) > 300000 ? 'Confirmation unavailable; inspect Gateway setting' : 'Pending: ' + result.status\r\n    });\r\n  })\r\n  .catch(() => context.panel.patchFormValue({\r\n    timeoutStatus: 'Command status unavailable'\r\n  }));",
+          "contentType": "application/json",
+          "datasource": "",
+          "getPayload": "return {}",
+          "highlight": false,
+          "highlightColor": "green",
+          "method": "query",
+          "payload": {}
+        },
+        "layout": {
+          "orientation": "vertical",
+          "padding": 10,
+          "sectionVariant": "default",
+          "sections": [],
+          "variant": "single"
+        },
+        "reset": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "process",
+          "text": "Reset",
+          "variant": "hidden"
+        },
+        "resetAction": {
+          "code": "",
+          "confirm": false,
+          "getPayload": "return {}",
+          "mode": "initial",
+          "payload": {}
+        },
+        "saveDefault": {
+          "icon": "save",
+          "text": "Save Default",
+          "variant": "hidden"
+        },
+        "submit": {
+          "backgroundColor": "purple",
+          "foregroundColor": "yellow",
+          "icon": "cloud-upload",
+          "text": "Save failsafe timeout",
+          "variant": "primary"
+        },
+        "sync": true,
+        "update": {
+          "code": "const response = context.panel.response;\r\nif (!response) {\r\n  context.grafana.notifyError(['Failsafe timeout', 'Request failed']);\r\n  return;\r\n}\r\n\r\nreturn response.clone().json().then(body => {\r\n  if (!response.ok) {\r\n    context.grafana.notifyError(['Failsafe timeout', JSON.stringify(body)]);\r\n    return;\r\n  }\r\n\r\n  const gateway = context.grafana.templateService.replace('${gateway_id}');\r\n  const target = Number(\r\n    context.panel.elements.find(e => e.id === 'relayMaxOnSeconds')?.value\r\n  );\r\n\r\n  localStorage.setItem(\r\n    'lorahome-timeout-command:' + gateway,\r\n    JSON.stringify({ id: body.commandId, target, issuedAt: Date.now() })\r\n  );\r\n  context.panel.patchFormValue({ timeoutStatus: 'Pending: published' });\r\n  context.panel.disableSubmit();\r\n  context.grafana.notifyWarning([\r\n    'Failsafe timeout',\r\n    'Command sent; awaiting Gateway confirmation. ID: ' + body.commandId\r\n  ]);\r\n}).catch(() => context.grafana.notifyError(['Failsafe timeout', 'Invalid response']));",
+          "confirm": true,
+          "contentType": "application/json",
+          "getPayload": "const state=context.panel.elements.find(e=>e.id==='timeoutStatus')?.value;if(state!=='Setting saved; applies on next ON')throw Error('Gateway status unavailable');const value=Number(context.panel.elements.find(e=>e.id==='relayMaxOnSeconds')?.value);if(!Number.isInteger(value)||value<1||value>7200)throw Error('Timeout must be 1?7200 seconds');return {relayMaxOnSeconds:value};",
+          "header": [
+            {
+              "name": "Authorization",
+              "value": {{ ("Bearer " ~ control_api_token) | to_json }}
+            }
+          ],
+          "method": "POST",
+          "payload": {},
+          "payloadMode": "custom",
+          "url": "https://{{ control_api_host }}/api/v1/gateways/${gateway_id}/relay"
+        },
+        "updateEnabled": "auto"
+      },
+      "pluginVersion": "5.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_relay_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"maxOnSeconds\") |> last() |> map(fn: (r) => ({_time: r._time, maxOnSeconds: r._value}))",
+          "refId": "B"
+        }
+      ],
+      "title": "Failsafe timeout",
+      "transparent": true,
+      "type": "volkovlabs-form-panel"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "false": {
+                  "color": "blue",
+                  "index": 1,
+                  "text": "OFF"
+                },
+                "true": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "ON"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "Unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "id": 110,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_relay_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"feedbackClosed\") |> last() |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Relay Status",
+      "type": "stat",
+      "description": "Measured relay contact state; it does not prove boiler heat or mains power."
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "false": {
+                  "text": "No"
+                },
+                "true": {
+                  "text": "Yes"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "Unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 12,
+        "y": 15
+      },
+      "id": 109,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_relay_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"durable\") |> last() |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Relay state saved",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "false": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "OK"
+                },
+                "true": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "Alert"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "Unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": ""
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 15
+      },
+      "id": 107,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^(?!_?[Tt]ime$).+/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_relay_status\" and r.gateway_id == \"${gateway_id}\" and r._field == \"failed\") |> last() |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Relay Alert",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "noValue": "Unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 21,
+        "x": 0,
+        "y": 20
+      },
+      "id": 111,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"sensor_reading\" and\r\n    r.sensor_id == \"${sensor_id}\" and\r\n    r._field == \"temperature_c\"\r\n  )\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> keep(columns: [\"_time\", \"_value\"])\r\n  |> rename(columns: {_value: \"Temperature\"})",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature history",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "false": {
+                  "color": "blue",
+                  "index": 1,
+                  "text": "OFF"
+                },
+                "true": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "ON"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "Unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 20
+      },
+      "id": 115,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\")\r\n  |> range(start: -30d)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"sensor_reading\" and\r\n    r.sensor_id == \"${sensor_id}\" and\r\n    r._field == \"sleepInterval\"\r\n  )\r\n  |> last()\r\n  |> keep(columns: [\"_time\", \"_value\"])\r\n  |> rename(columns: {_value: \"Sensor sleep time/refresh rate\"})",
+          "refId": "A"
+        }
+      ],
+      "title": "Sensor Refresh Period (sleep Time)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "fillOpacity": 82,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "false": {
+                  "color": "blue",
+                  "text": "OFF"
+                },
+                "true": {
+                  "color": "green",
+                  "text": "ON"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "Unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 112,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "mergeValues": true,
+        "rowHeight": 0.9,
+        "showValue": "auto",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"gateway_relay_status\" and\r\n    r.gateway_id == \"${gateway_id}\" and\r\n    r._field == \"feedbackClosed\"\r\n  )\r\n  |> sort(columns: [\"_time\"], desc: true)\r\n  |> limit(n: 20000)\r\n  |> sort(columns: [\"_time\"])\r\n  |> drop(columns: [\"gateway_id\"])\r\n  |> map(fn: (r) => ({r with _field: \" \"}))",
+          "refId": "A"
+        }
+      ],
+      "title": "State history",
+      "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "lorahome-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "green",
+                  "index": 3,
+                  "text": "OK"
+                },
+                "1": {
+                  "color": "yellow",
+                  "index": 2,
+                  "text": "Pending or mismatch"
+                },
+                "2": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "Failed to Verify State"
+                },
+                "3": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "State not saved"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "Stale or unavailable",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "id": 114,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "lorahome-influxdb"
+          },
+          "query": "from(bucket: \"{{ influxdb_bucket }}\") |> range(start: -5m) |> filter(fn: (r) => r._measurement == \"gateway_relay_status\" and r.gateway_id == \"${gateway_id}\" and (r._field == \"feedbackClosed\" or r._field == \"requestedClosed\" or r._field == \"failed\" or r._field == \"durable\")) |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\") |> sort(columns: [\"_time\"], desc: true) |> limit(n: 1) |> map(fn: (r) => ({r with _value: if r.failed then 2 else if r.feedbackClosed != r.requestedClosed then 1 else if not r.durable then 3 else 0})) |> keep(columns: [\"_time\", \"_value\"]) |> group(columns: [])",
+          "refId": "A"
+        }
+      ],
+      "title": "Relay Error",
+      "type": "stat"
+    }
+  ],
+  "preload": false,
+  "refresh": "5s",
+  "schemaVersion": 41,
+  "tags": [
+    "lorahome",
+    "boiler"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "lorahome-influxdb"
+        },
+        "includeAll": false,
+        "label": "Sensor",
+        "name": "sensor_id",
+        "options": [],
+        "query": {
+          "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: \"{{ influxdb_bucket }}\", tag: \"sensor_id\", predicate: (r) => r._measurement == \"sensor_reading\", start: -30d)"
+        },
+        "refresh": 1,
+        "regex": "/^[0-9A-F]{2}(?::[0-9A-F]{2}){5}$/",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "lorahome-influxdb"
+        },
+        "includeAll": false,
+        "label": "Gateway",
+        "name": "gateway_id",
+        "options": [],
+        "query": {
+          "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: \"{{ influxdb_bucket }}\", tag: \"gateway_id\", predicate: (r) => r._measurement == \"gateway_status\", start: -30d)"
+        },
+        "refresh": 1,
+        "regex": "/^[0-9A-F]{2}(?::[0-9A-F]{2}){5}$/",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Home-prototype",
+  "uid": "lorahome-home",
+  "version": 1
+}
